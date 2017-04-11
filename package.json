@@ -1,13 +1,13 @@
 {
-  "name": "shabbtech-backend",
+  "name": "server",
   "version": "1.0.0",
-  "description": "node backend application",
+  "description": "a node and express based backend application",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "test": "nyc mocha src/**/*.spec.js",
     "dev": "nodemon index.js src/**/*.js",
-    "lint": "jshint src",
-    "test": "nyc mocha src/**/*.spec.js"
+    "lint": "jshint src"
   },
   "repository": {
     "type": "git",
