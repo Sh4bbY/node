@@ -38,7 +38,7 @@ class Server {
             this.app.use(compression());
 
             // parse application/x-www-form-urlencoded
-            this.app.use(bodyParser.urlencoded({ extended: false }))
+            this.app.use(bodyParser.urlencoded({ extended: false }));
 
             // parse application/json
             this.app.use(bodyParser.json());

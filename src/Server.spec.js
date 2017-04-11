@@ -54,6 +54,7 @@ describe('Server', () => {
             const serverB = new Server(config);
             serverA.start().then(() => {
                 serverB.start().catch(err => {
+                    assert.match(err, /listen EADDRINUSE/);
                     serverA.stop().then(() => done());
                 });
             });
@@ -66,7 +67,7 @@ describe('Server', () => {
             server.stop().catch(err => {
                 assert.equal(err, 'Server has not yet been started');
                 done();
-            })
+            });
         });
 
         it('should execute process.exit in case of forced stop', done => {
