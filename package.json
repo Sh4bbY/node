@@ -1,0 +1,47 @@
+{
+  "name": "shabbtech-backend",
+  "version": "1.0.0",
+  "description": "node backend application",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js src/**/*.js",
+    "test": "nyc mocha src/**/*.spec.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sh4bbY/node.git"
+  },
+  "author": "Sascha Bialon",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Sh4bbY/node/issues"
+  },
+  "homepage": "https://github.com/Sh4bbY/node#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0",
+    "nodemon": "^1.11.0",
+    "nyc": "^10.2.0",
+    "sinon": "^2.1.0"
+  },
+  "dependencies": {
+    "body-parser": "^1.17.1",
+    "compression": "^1.6.2",
+    "express": "^4.15.2",
+    "joi": "^10.4.1",
+    "log4js": "^1.1.1"
+  },
+  "nyc": {
+    "include": [
+      "src/**/*.js"
+    ],
+    "reporter": [
+      "html",
+      "text-summary"
+    ],
+    "exclude": [
+      "src/**/*.spec.js"
+    ]
+  }
+}
