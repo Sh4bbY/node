@@ -1,6 +1,7 @@
 {
   "server": {
     "protocol": "http",
-    "port": 8000
+    "port": 8001,
+    "secret": "LPjNP5H0#o1R(5}5r{8Iet5Bf8"
   }
 }
