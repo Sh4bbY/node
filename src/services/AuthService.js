@@ -40,7 +40,7 @@ module.exports = class SecurityService {
         
         if (!!validationResult.error) {
             validationResult.error.details.forEach(err => logger.error(err.message));
-            throw new Error('Invalid Configuration', validationResult.error);
+            throw new Error('Invalid Parameters', validationResult.error);
         }
         
         this.db.findUserByEmail(req.body.email)

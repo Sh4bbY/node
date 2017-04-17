@@ -6,8 +6,21 @@ const logger = require('log4js').getLogger('server');
 
 const Server = require('./Server');
 
-const spy = {
-    exit: sinon.spy()
+const spy  = {
+    exit  : sinon.spy(),
+    status: sinon.spy(),
+    send  : sinon.spy()
+};
+const mock = {
+    res: {
+        status: (code) => {
+            spy.status(code);
+            return {send: mock.res.send};
+        },
+        send  : (val) => {
+            spy.send(val);
+        }
+    }
 };
 
 logger.setLevel('off');
@@ -78,6 +91,38 @@ describe('Server', () => {
                 assert.isTrue(spy.exit.calledOnce);
                 done();
             });
+        });
+    });
+    
+    describe('registerService', () => {
+        it('should register a service to the server', () => {
+            const server  = new Server(config);
+            const Service = class Service {
+            };
+            server.registerService(Service);
+            assert.instanceOf(server.services[0], Service);
+        });
+    });
+    
+    describe('_errorHandler', () => {
+        it('should register a service to the server', () => {
+            mock.err = {name: 'undefined error', message: 'undefined message'};
+            Server._errorHandler(mock.err, mock.req, mock.res);
+            assert.equal(spy.status.callCount, 1);
+            assert.isTrue(spy.status.calledWith(500));
+            assert.equal(spy.send.callCount, 1);
+            assert.isTrue(spy.send.calledWith(mock.err.message));
+        });
+        
+        it('should register a service to the server', () => {
+            spy.status.reset();
+            spy.send.reset();
+            mock.err = {name: 'UnauthorizedError', message: 'unauthorized message'};
+            Server._errorHandler(mock.err, mock.req, mock.res);
+            assert.equal(spy.status.callCount, 1);
+            assert.isTrue(spy.status.calledWith(401));
+            assert.equal(spy.send.callCount, 1);
+            assert.isTrue(spy.send.calledWith(mock.err.message));
         });
     });
 });

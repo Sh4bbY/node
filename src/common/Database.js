@@ -11,10 +11,6 @@ const userSchema = new mongoose.Schema({
 const UserModel  = mongoose.model('User', userSchema);
 
 module.exports = class Database {
-    constructor() {
-    
-    }
-    
     connect() {
         mongoose.connect('mongodb://localhost/test');
     }
