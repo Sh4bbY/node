@@ -3,6 +3,7 @@
 const express     = require('express');
 const compression = require('compression');
 const bodyParser  = require('body-parser');
+const bearerToken = require('express-bearer-token');
 const logger      = require('log4js').getLogger('server');
 const Joi         = require('joi');
 
@@ -14,7 +15,6 @@ const configSchema = Joi.object().keys({
 
 class Server {
     constructor(config) {
-        
         const validationResult = Joi.validate(config, configSchema);
         if (!!validationResult.error) {
             validationResult.error.details.forEach(err => logger.error(err.message));
@@ -74,14 +74,14 @@ class Server {
     
     /**
      * registers a new service to the server.
-     * @param serviceClass
+     * @param service  An Instance of an service
      */
-    registerService(Service) {
-        const service = new Service(this);
+    registerService(service) {
         this.services.push(service);
     }
     
     _registerMiddleware() {
+        this.app.use(bearerToken());
         this.app.use(compression());                                    // use gzip compression for the response body
         this.app.use(bodyParser.urlencoded({extended: false}));         // parse application/x-www-form-urlencoded
         this.app.use(bodyParser.json());                                // parse application/json

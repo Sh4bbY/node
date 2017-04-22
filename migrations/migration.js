@@ -1,10 +1,14 @@
-const Database = require('../common/Database');
+'use strict';
+const Database = require('../src/common/Database');
 const db       = new Database();
 
-db.connect();
-db.cleanUp();
-db.createUser({
-    name    : 'admin',
-    email   : 'admin@admins.de',
-    password: 'admin'
+db.connect().then(() => {
+    //db.cleanUp();
+    db.createUser({
+        name    : 'test',
+        email   : 'admin@test.de',
+        password: 'test'
+    });
+    // db.disconnect();
 });
+
