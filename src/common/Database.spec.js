@@ -12,6 +12,7 @@ const mock = {
                       cb();
                   }
               },
+              connection: {},
               connect: sinon.spy(),
               model  : () => class Model {
                   save(cb) {
@@ -54,10 +55,10 @@ describe('Database', () => {
         });
     });
     
-    describe('findUserByEmail', () => {
-        it('findUserByEmail', () => {
+    describe('findUserByName', () => {
+        it('findUserByName', () => {
             const db = new Database();
-            db.findUserByEmail();
+            db.findUserByName();
         });
     });
     

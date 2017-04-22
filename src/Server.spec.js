@@ -100,7 +100,7 @@ describe('Server', () => {
             const Service = class Service {
             };
             server.registerService(Service);
-            assert.instanceOf(server.services[0], Service);
+            assert.equal(server.services[0], Service);
         });
     });
     
