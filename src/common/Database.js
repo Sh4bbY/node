@@ -1,34 +1,33 @@
 'use strict';
 
 const mongoose   = require('mongoose');
-mongoose.Promise = Promise;
 const bcrypt     = require('bcrypt');
 const logger     = require('log4js').getLogger('server');
+const schemata   = require('./schemata');
 const saltRounds = 10;
 
-const userSchema     = new mongoose.Schema({
-    name         : String,
-    password_hash: String,
-    email        : String,
-    createdAt    : Date
-});
-const BlogPostSchema = new mongoose.Schema({
-    author   : {
-        name : String,
-        email: String,
-        id   : String
-    },
-    title    : String,
-    body     : String,
-    createdAt: Date
-});
-const UserModel      = mongoose.model('test', userSchema);
-const BlogPostModel  = mongoose.model('BlogPost', BlogPostSchema);
-
 module.exports = class Database {
+    constructor(config) {
+        this.config      = config;
+        mongoose.Promise = Promise;
+        this.model       = {};
+        
+        this.loadModel('User');
+        this.loadModel('Post');
+    }
+    
+    loadModel(name) {
+        if (mongoose.models[name]) {
+            this.model[name] = mongoose.model(name);
+        } else {
+            const schema     = new mongoose.Schema(schemata[name]);
+            this.model[name] = mongoose.model(name, schema);
+        }
+    }
+    
     connect() {
         if (!mongoose.connection.readyState) {
-            return mongoose.connect('mongodb://localhost/test');
+            return mongoose.connect(`mongodb://${this.config.host}:${this.config.port}/${this.config.database}`);
         }
     }
     
@@ -37,16 +36,15 @@ module.exports = class Database {
     }
     
     cleanUp() {
-        UserModel.collection.remove({});
-        BlogPostModel.collection.remove({});
+        Object.keys(this.model).forEach(key => this.model[key].collection.remove({}));
     }
     
     findUserByName(name) {
-        return UserModel.findOne({name: {$regex: new RegExp(name, 'i')}});
+        return this.model.User.findOne({name: {$regex: new RegExp(name, 'i')}});
     }
     
     findUserByNameOrEmail(name, email) {
-        return UserModel.findOne({
+        return this.model.User.findOne({
             $or: [
                 {name: {$regex: new RegExp(name, 'i')}},
                 {email: {$regex: new RegExp(email, 'i')}}
@@ -63,7 +61,7 @@ module.exports = class Database {
                     email        : user.email.toLowerCase(),
                     createdAt    : Date.now()
                 };
-                const userModel  = new UserModel(dataRecord);
+                const userModel  = new this.model.User(dataRecord);
                 userModel.save((err, savedUser) => {
                     if (err) {
                         return reject(err);
@@ -89,7 +87,7 @@ module.exports = class Database {
                 createdAt: Date.now()
             };
             
-            const newPost = new BlogPostModel(storageData);
+            const newPost = new this.model.Post(storageData);
             newPost.save((err, savedPost) => {
                 if (err) {
                     reject(err);
@@ -103,7 +101,7 @@ module.exports = class Database {
     
     fetchBlogPosts(data) {
         return new Promise((resolve, reject) => {
-            BlogPostModel
+            this.model.Post
                 .find({})
                 .sort({createdAt: 'desc'})
                 .exec((err, docs) => {
@@ -117,7 +115,7 @@ module.exports = class Database {
     
     updateBlogPost(id, data) {
         return new Promise((resolve, reject) => {
-            BlogPostModel.findOneAndUpdate({_id: id}, {$set: data}, {new: true}, (err, doc) => {
+            this.model.Post.findOneAndUpdate({_id: id}, {$set: data}, {new: true}, (err, doc) => {
                 if (err) {
                     return reject(err);
                 }
@@ -128,7 +126,7 @@ module.exports = class Database {
     
     deleteBlogPost(id) {
         return new Promise((resolve, reject) => {
-            BlogPostModel.remove({_id: id}, (err, doc) => {
+            this.model.Post.remove({_id: id}, (err, doc) => {
                 if (err) {
                     return reject(err);
                 }

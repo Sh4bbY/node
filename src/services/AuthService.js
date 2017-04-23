@@ -4,7 +4,6 @@ const Joi        = require('joi');
 const expressJwt = require('express-jwt');
 const jwt        = require('jsonwebtoken');
 const logger     = require('log4js').getLogger('server');
-const Database   = require('../common/Database');
 const bcrypt     = require('bcrypt');
 
 // Todo Move to File/Db:
@@ -22,8 +21,8 @@ module.exports = class AuthService {
     constructor(server) {
         this.server = server;
         this.router = server.router;
-        this.db     = new Database();
-        this.db.connect();
+        this.db     = server.db.mongo;
+        
         this.router.post('/api/login', handleLogin.bind(this));
         this.router.post('/api/loginByToken', handleLoginByToken.bind(this));
         this.router.post('/api/registration', handleRegistration.bind(this));

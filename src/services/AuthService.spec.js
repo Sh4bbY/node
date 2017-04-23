@@ -9,7 +9,9 @@ const assert    = chai.assert;
 
 chai.use(chaiHttp);
 
+const config      = require('../../config.json');
 const Server      = require('../Server');
+const Database    = require('../common/Database');
 const AuthService = require('./AuthService');
 
 logger.setLevel('off');
@@ -27,15 +29,12 @@ describe('AuthService', () => {
     
     before((done) => {
         const mockgoose = new Mockgoose(mongoose);
-        const config = {
-            'protocol': 'http',
-            'port'    : 8101,
-            'secret'  : 'LPjNP5H0#o1R(5}5r{8Iet5Bf8'
-        };
-        validToken   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU4Zjk0NjY3ODdmOTAzNmZkZjQxM2YyZCIsIm5hbWUiOiJzaGFiYnkiLCJlbWFpbCI6ImFzZEBhc2QuZGUiLCJpYXQiOjE0OTI5MDIwOTJ9.J-OO_LX1NplMfKn4yyY17f796smBVVGSLuYOtntug8s';
+        
+        validToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU4Zjk0NjY3ODdmOTAzNmZkZjQxM2YyZCIsIm5hbWUiOiJzaGFiYnkiLCJlbWFpbCI6ImFzZEBhc2QuZGUiLCJpYXQiOjE0OTI5MDIwOTJ9.J-OO_LX1NplMfKn4yyY17f796smBVVGSLuYOtntug8s';
         
         mockgoose.prepareStorage().then(() => {
-            server  = new Server(config);
+            server = new Server(config.server);
+            server.registerDb('mongo', new Database(config.mongodb));
             service = new AuthService(server);
             server.registerService(service);
             server.start();

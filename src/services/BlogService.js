@@ -4,14 +4,12 @@ const Joi        = require('joi');
 const expressJwt = require('express-jwt');
 const jwt        = require('jsonwebtoken');
 const logger     = require('log4js').getLogger('server');
-const Database   = require('../common/Database');
 
 module.exports = class BlogService {
     constructor(server) {
         this.server = server;
-        this.router = this.server.router;
-        this.db     = new Database();
-        this.db.connect();
+        this.router = server.router;
+        this.db     = server.db.mongo;
         
         const protectMiddleware = expressJwt({secret: this.server.config.secret});
         

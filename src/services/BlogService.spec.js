@@ -9,7 +9,9 @@ const assert    = chai.assert;
 
 chai.use(chaiHttp);
 
+const config      = require('../../config.json');
 const Server      = require('../Server');
+const Database    = require('../common/Database');
 const BlogService = require('./BlogService');
 
 logger.setLevel('off');
@@ -22,16 +24,12 @@ describe('BlogService', () => {
     
     before((done) => {
         const mockgoose = new Mockgoose(mongoose);
-        const config    = {
-            'protocol': 'http',
-            'port'    : 8101,
-            'secret'  : 'LPjNP5H0#o1R(5}5r{8Iet5Bf8'
-        };
         
         validToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU4ZmJmY2ZiMzQxMmYxNzRkNWIwZDFjYSIsIm5hbWUiOiJ0ZXN0LXVzZXIiLCJlbWFpbCI6InRlc3RAdXNlci5kZSIsImlhdCI6MTQ5MjkwOTMwN30.BhcL3atRuQroLTYwR1kDQQo6Vh6ZnV-sY0QKgxhf9DI';
         
         mockgoose.prepareStorage().then(() => {
-            server  = new Server(config);
+            server  = new Server(config.server);
+            server.registerDb('mongo', new Database(config.mongodb));
             service = new BlogService(server);
             server.registerService(service);
             server.start();

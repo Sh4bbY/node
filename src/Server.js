@@ -24,6 +24,7 @@ class Server {
         this.app      = express();
         this.router   = express.Router();
         this.services = [];
+        this.db       = {};
     }
     
     /**
@@ -34,6 +35,7 @@ class Server {
         return new Promise((resolve, reject) => {
             this._registerMiddleware();
             
+            Object.keys(this.db).forEach(key => this.db[key].connect());
             this.server = require(this.config.protocol).createServer(this.app);
             this.server.listen(this.config.port, () => {
                 logger.info(`Server is started and listening on port ${this.config.port}`);
@@ -65,11 +67,21 @@ class Server {
                 return reject('Server has not yet been started');
             }
             
+            Object.keys(this.db).forEach(key => this.db[key].disconnect());
             this.server.close(() => {
                 logger.info('Closed all remaining connections.');
                 return resolve();
             });
         });
+    }
+    
+    /**
+     * registers a new database instance to the server.
+     * @param name  the name of the database
+     * @param database  the database Instance
+     */
+    registerDb(name, database) {
+        this.db[name] = database;
     }
     
     /**

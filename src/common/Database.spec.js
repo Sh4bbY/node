@@ -13,8 +13,13 @@ logger.setLevel('off');
 describe('Database', () => {
     before((done) => {
         mockgoose.prepareStorage().then(() => {
-            Database = require('./Database');
-            db       = new Database();
+            const config = {
+                'port'    : 27017,
+                'host'    : 'localhost',
+                'database': 'test'
+            };
+            Database     = require('./Database');
+            db           = new Database(config);
             done();
         });
     });
@@ -27,15 +32,7 @@ describe('Database', () => {
     
     describe('cleanUp', () => {
         it('cleans Up', () => {
-            const db = new Database();
             db.cleanUp();
-        });
-    });
-    
-    describe('findUserByName', () => {
-        it('findUserByName', () => {
-            const db = new Database();
-            db.findUserByName();
         });
     });
     
@@ -46,9 +43,17 @@ describe('Database', () => {
                 email   : 'someEmail',
                 password: 'somePw'
             };
-            db.createUser(user).then(userRecord => {
-                assert.hasOwnProperty(userRecord, '_id');
+            db.createUser(user).then(record => {
+                assert.hasOwnProperty(record, '_id');
                 done();
+            });
+        });
+    });
+    
+    describe('findUserByName', () => {
+        it('findUserByName', () => {
+            db.findUserByName('dummy').then(record => {
+                assert.hasOwnProperty(record, '_id');
             });
         });
     });
