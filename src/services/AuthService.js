@@ -35,28 +35,6 @@ module.exports = class AuthService {
     }
 };
 
-
-function handleLoginByToken(req, res) {
-    try {
-        jwt.verify(req.body.token, this.server.config.secret);
-        return res.json({token: req.body.token});
-    } catch (err) {
-        logger.error('Invalid Token: ', err.message);
-        return res.status(401).json({error: 'invalid token'});
-    }
-}
-
-function handleLogout(req, res) {
-    try {
-        jwt.verify(req.token, this.server.config.secret);
-        revokedTokens.push(req.token);
-        res.send('');
-    } catch (err) {
-        logger.error('Invalid Token: ', err.message);
-        return res.status(401).send('invalid token');
-    }
-}
-
 function handleLogin(req, res) {
     const requestSchema = Joi.object().keys({
         name    : Joi.string().required(),
@@ -67,7 +45,7 @@ function handleLogin(req, res) {
     
     if (!!validationResult.error) {
         validationResult.error.details.forEach(err => logger.error(err.message));
-        return res.status(403).send('invalid credentials');
+        return res.status(400).send('invalid parameters');
     }
     
     const {name, password} = req.body;
@@ -76,7 +54,7 @@ function handleLogin(req, res) {
         .then(user => {
             if (user === null) {
                 logger.debug(`Ip ${req.ip} failed login for non-existing user ${name}`);
-                return res.status(403).send('invalid credentials');
+                return res.status(400).send('invalid credentials');
             }
             
             bcrypt.compare(password, user.password_hash).then(isValid => {
@@ -86,14 +64,29 @@ function handleLogin(req, res) {
                         name : user.name,
                         email: user.email
                     };
-                    res.json({token: jwt.sign(payload, this.server.config.secret)});
+                    return res.json({token: jwt.sign(payload, this.server.config.secret)});
                 }
                 else {
                     logger.warn(`Ip ${req.ip} failed login for user ${name}`);
-                    return res.status(403).send('invalid credentials');
+                    return res.status(400).send('invalid credentials');
                 }
             });
         });
+}
+
+function handleLoginByToken(req, res) {
+    try {
+        jwt.verify(req.body.token, this.server.config.secret);
+        return res.json({token: req.body.token});
+    } catch (err) {
+        logger.error('Invalid Token: ', err.message);
+        return res.status(400).json({error: 'invalid token'});
+    }
+}
+
+function handleLogout(req, res) {
+    revokedTokens.push(req.token);
+    res.sendStatus(200);
 }
 
 function handleRegistration(req, res) {
@@ -108,10 +101,10 @@ function handleRegistration(req, res) {
     
     if (!!validationResult.error) {
         validationResult.error.details.forEach(err => logger.error(err.message));
-        throw new Error('Invalid Parameters', validationResult.error);
+        return res.status(400).send('invalid parameters')
     }
     if (req.body.password !== req.body.password_check) {
-        throw new Error('Invalid Parameters');
+        return res.status(400).send('passwords do not match')
     }
     
     logger.debug('received valid registration request');
@@ -120,7 +113,7 @@ function handleRegistration(req, res) {
                 if (foundUser === null) {
                     this.db.createUser(req.body)
                         .then(user => {
-                            res.json({
+                            return res.json({
                                 id       : user._id,
                                 name     : user.name,
                                 email    : user.email,
@@ -129,12 +122,12 @@ function handleRegistration(req, res) {
                         })
                         .catch(err => {
                             logger.error('error creating user:', err);
-                            res.sendStatus(500);
+                            return res.sendStatus(500);
                         });
                 } else {
                     const msg = 'Name or Email already registered.';
                     logger.error(msg);
-                    res.sendStatus(422);
+                    return res.sendStatus(400);
                 }
             }
         );

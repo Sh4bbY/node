@@ -1,117 +1,200 @@
 'use strict';
 
-const rewire = require('rewire');
-const assert = require('chai').assert;
-const sinon  = require('sinon');
-const logger = require('log4js').getLogger('server');
+const chai      = require('chai');
+const assert    = chai.assert;
+const chaiHttp  = require('chai-http');
+const logger    = require('log4js').getLogger('server');
+const mongoose  = require('mongoose');
+const Mockgoose = require('mockgoose').Mockgoose;
+const mockgoose = new Mockgoose(mongoose);
 
-const spy  = {
-    status: sinon.spy()
-};
-const mock = {
-    server: {
-        config: {
-            secret: 'fakeSecret'
-        },
-        router: {
-            get : sinon.spy(),
-            post: sinon.spy()
-        }
-    },
-    req   : {
-        body: {}
-    },
-    res   : {
-        status: (code) => {
-            spy.status(code);
-            return mock.res;
-        },
-        send: sinon.spy(),
-        json  : sinon.spy()
-    }
-};
+const Server      = require('../Server');
+const AuthService = require('./AuthService');
 
-const AuthService = rewire('./AuthService');
+
+chai.use(chaiHttp);
 
 logger.setLevel('off');
 
+const validUser = {
+    name    : 'test-user',
+    email   : 'test@user.de',
+    password: 'test-password'
+};
+
 describe('AuthService', () => {
-    describe('constructor', () => {
-        it('should create a new Service instance without an error', () => {
-            const service = new AuthService(mock.server);
-            assert.instanceOf(service, AuthService);
+    let server;
+    let service;
+    let validToken;
+    
+    before((done) => {
+        const config = {
+            'protocol': 'http',
+            'port'    : 8101,
+            'secret'  : 'LPjNP5H0#o1R(5}5r{8Iet5Bf8'
+        };
+        validToken   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU4Zjk0NjY3ODdmOTAzNmZkZjQxM2YyZCIsIm5hbWUiOiJzaGFiYnkiLCJlbWFpbCI6ImFzZEBhc2QuZGUiLCJpYXQiOjE0OTI5MDIwOTJ9.J-OO_LX1NplMfKn4yyY17f796smBVVGSLuYOtntug8s';
+        
+        mockgoose.prepareStorage().then(() => {
+            server  = new Server(config);
+            service = new AuthService(server);
+            server.registerService(service);
+            server.start();
+            done();
         });
     });
     
-    describe('handleLoginByToken', () => {
-        it('should start and then stop Server without an error', () => {
-            const handleLoginByToken = AuthService.__get__('handleLoginByToken');
-            handleLoginByToken(mock.req, mock.res);
+    after((done) => {
+        server.stop().then(() => done());
+    });
+    
+    describe('handleRegistration', () => {
+        
+        it('should return status 400 if the request was invalid', (done) => {
+            const body = {};
+            chai.request(server.app)
+                .post('/api/registration')
+                .send(body)
+                .end((err, res) => {
+                    assert.equal(res.status, 400);
+                    done();
+                });
+        });
+        
+        it('should return status 400 if passwords do not match', (done) => {
+            const body = {
+                name          : validUser.name,
+                email         : validUser.email,
+                password      : 'passwordA',
+                password_check: 'passwordB'
+            };
+            chai.request(server.app)
+                .post('/api/registration')
+                .send(body)
+                .end((err, res) => {
+                    assert.equal(res.status, 400);
+                    done();
+                });
+        });
+        
+        it('should return status 400 if user name or email is already registered', (done) => {
+            const body = {
+                name          : 'dummy',
+                email         : validUser.email,
+                password      : 'passwordA',
+                password_check: 'passwordA'
+            };
+            chai.request(server.app)
+                .post('/api/registration')
+                .send(body)
+                .end((err, res) => {
+                    assert.equal(res.status, 400);
+                    done();
+                });
+        });
+        
+        it('should return status 200 if request was valid', (done) => {
+            const body = {
+                name          : validUser.name,
+                email         : validUser.email,
+                password      : validUser.password,
+                password_check: validUser.password
+            };
+            chai.request(server.app)
+                .post('/api/registration')
+                .send(body)
+                .end((err, res) => {
+                    assert.equal(res.status, 200);
+                    done();
+                });
         });
     });
     
     describe('handleLogin', () => {
-        it('should throw an error if parameters are not valid', () => {
-            const handleLogin = AuthService.__get__('handleLogin');
-            handleLogin(mock.req, mock.res);
-            assert.isTrue(spy.status.calledWith(403));
+        it('should return status 400 if the request was invalid', (done) => {
+            const body = {};
+            chai.request(server.app)
+                .post('/api/login')
+                .send(body)
+                .end((err, res) => {
+                    assert.equal(res.status, 400);
+                    done();
+                })
         });
         
-        it('rejected findByEmail Promise', () => {
-            mock.req.body     = {
-                email   : 'someEmail@address.com',
-                password: 'somePlainTextPw'
-            };
-            const mockContext = {db: {findUserByEmail: () => Promise.reject()}};
-            const handleLogin = AuthService.__get__('handleLogin');
-            handleLogin.bind(mockContext)(mock.req, mock.res);
-            
+        it('should return status 400 if the name could not be found', (done) => {
+            const body = {name: 'non-existing-user', password: 'invalid-pasword'};
+            chai.request(server.app)
+                .post('/api/login')
+                .send(body)
+                .end((err, res) => {
+                    assert.equal(res.status, 400);
+                    done();
+                })
         });
         
-        it('user not found', () => {
-            mock.req.body     = {
-                email   : 'someEmail@address.com',
-                password: 'somePlainTextPw'
+        it('should return status 400 if the password was not valid', (done) => {
+            const body = {
+                name    : validUser.name,
+                password: 'invalid-password'
             };
-            const user        = null;
-            const mockContext = {db: {findUserByEmail: () => Promise.resolve(user)}};
-            const handleLogin = AuthService.__get__('handleLogin');
-            handleLogin.bind(mockContext)(mock.req, mock.res);
+            chai.request(server.app)
+                .post('/api/login')
+                .send(body)
+                .end((err, res) => {
+                    assert.equal(res.status, 400);
+                    done();
+                })
         });
         
-        it('user not found', () => {
-            mock.req.body     = {
-                email   : 'someEmail@address.com',
-                password: 'admin'
+        it('should return status 200 if login credentials are valid', (done) => {
+            const body = {
+                name    : validUser.name,
+                password: validUser.password
             };
-            const user        = {
-                password: '$2a$10$cvqxqgS4Z8KayUoykpkAc.TH6zFORu5M4jxB7.yUV.DjgP3a/H1hy'
-            };
-            const mockContext = {db: {findUserByEmail: () => Promise.resolve(user)}};
-            const handleLogin = AuthService.__get__('handleLogin');
-            handleLogin.bind(mockContext)(mock.req, mock.res);
+            chai.request(server.app)
+                .post('/api/login')
+                .send(body)
+                .end((err, res) => {
+                    assert.equal(res.status, 200);
+                    done();
+                });
         });
     });
     
-    describe('handleRegistration', () => {
-        it('should handle user registration', () => {
-            const handleRegistration = AuthService.__get__('handleRegistration');
-            const req                = {
-                body: {
-                    name          : 'test-username',
-                    email         : 'test@test.de',
-                    password      : 'test-password',
-                    password_check: 'test-password'
-                }
-            };
-            const context            = {
-                db: {
-                    findUserByNameOrEmail: () => {
-                        return Promise.resolve({});
-                    }
-                }
-            };
-            handleRegistration.bind(context)(req, mock.res);
+    describe('handleLoginByToken', () => {
+        it('should return status 400 if an invalid token was sent', (done) => {
+            const body = {token: 'someInvalidToken'};
+            chai.request(server.app)
+                .post('/api/loginByToken')
+                .send(body)
+                .end((err, res) => {
+                    assert.equal(res.status, 400);
+                    done();
+                })
+        });
+        
+        it('should return status 200 if an valid token was sent', (done) => {
+            const body = {token: validToken};
+            chai.request(server.app)
+                .post('/api/loginByToken')
+                .send(body)
+                .end((err, res) => {
+                    assert.equal(res.status, 200);
+                    done();
+                })
+        });
+    });
+    
+    describe('logout', () => {
+        it('should return status 200 if the request was valid', (done) => {
+            chai.request(server.app)
+                .get('/api/logout')
+                .set('Authorization', 'Bearer ' + validToken)
+                .end((err, res) => {
+                    assert.equal(res.status, 200);
+                    done();
+                })
         });
     });
 });

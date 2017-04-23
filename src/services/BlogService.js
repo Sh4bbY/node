@@ -35,13 +35,13 @@ module.exports = class BlogService {
         
         if (!!validationResult.error) {
             validationResult.error.details.forEach(err => logger.error(err.message));
-            throw new Error('Invalid Parameters', validationResult.error);
+            return res.status(400).send('Invalid Parameters');
         }
         
         logger.debug('received valid blog-post creation request');
         this.db.createBlogPost(req.body)
             .then(() => {
-                res.json({status: 'success'});
+                return res.json({status: 'success'});
             });
     }
     
@@ -55,7 +55,7 @@ module.exports = class BlogService {
         
         if (!!validationResult.error) {
             validationResult.error.details.forEach(err => logger.error(err.message));
-            throw new Error('Invalid Parameters', validationResult.error);
+            return res.status(400).send('Invalid Parameters');
         }
         
         logger.debug('received valid fetch blog-posts request');

@@ -1,57 +1,28 @@
 'use strict';
 
-const assert      = require('chai').assert;
-const sinon       = require('sinon');
-const mockRequire = require('mock-require');
-const logger      = require('log4js').getLogger('server');
+const assert    = require('chai').assert;
+const sinon     = require('sinon');
+const logger    = require('log4js').getLogger('server');
+const mongoose  = require('mongoose');
+const Mockgoose = require('mockgoose').Mockgoose;
+const mockgoose = new Mockgoose(mongoose);
 
-const mock = {
-          mongoose: {
-              Schema : class Schema {
-                  save(cb) {
-                      cb();
-                  }
-              },
-              connection: {},
-              connect: sinon.spy(),
-              model  : () => class Model {
-                  save(cb) {
-                      cb('some error');
-                  }
-            
-                  static get collection() {
-                      return {drop: sinon.spy()};
-                  };
-            
-                  static findOne() {
-                  };
-              }
-          },
-          brcrypt : {
-              hash: () => Promise.resolve('generated mock-hash')
-          }
-      }
-;
 let Database;
+let db;
 logger.setLevel('off');
 
 describe('Database', () => {
-    
-    before(() => {
-        mockRequire('mongoose', mock.mongoose);
-        mockRequire('bcrypt', mock.brcrypt);
-        Database = mockRequire.reRequire('./Database');
-    });
-    
-    after(() => {
-        mockRequire.stop('mongoose');
+    before((done) => {
+        mockgoose.prepareStorage().then(() => {
+            Database = require('./Database');
+            db       = new Database();
+            done();
+        });
     });
     
     describe('connect', () => {
         it('should connect', () => {
-            const db = new Database();
             db.connect();
-            assert.equal(mock.mongoose.connect.callCount, 1);
         });
     });
     
@@ -70,15 +41,49 @@ describe('Database', () => {
     });
     
     describe('createUser', () => {
-        it('creates a User', () => {
-            const db = new Database();
-            db.connect();
+        it('creates a User', (done) => {
             const user = {
                 name    : 'dummy',
                 email   : 'someEmail',
                 password: 'somePw'
             };
-            db.createUser(user);
+            db.createUser(user).then(userRecord => {
+                assert.hasOwnProperty(userRecord, '_id');
+                done();
+            });
+        });
+    });
+    
+    describe('createBlogPost', () => {
+        it('creates a BlogPost', (done) => {
+            const data = {
+                author: {
+                    name : 'some',
+                    email: 'some',
+                    id   : 'some'
+                },
+                title : 'some',
+                body  : 'some'
+            };
+            db.createBlogPost(data).then(postRecord => {
+                assert.hasOwnProperty(postRecord, '_id');
+                done();
+            });
+        });
+    });
+    
+    describe('fetchBlogPosts', () => {
+        it('creates a BlogPost', (done) => {
+            db.fetchBlogPosts().then(postRecords => {
+                assert.instanceOf(postRecords, Array);
+                done();
+            });
+        });
+    });
+    
+    describe('disconnect', () => {
+        it('should disconnect', () => {
+            db.disconnect();
         });
     });
 });

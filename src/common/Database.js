@@ -89,12 +89,12 @@ module.exports = class Database {
             };
             
             const newPost = new BlogPostModel(storageData);
-            newPost.save(err => {
+            newPost.save((err, savedPost) => {
                 if (err) {
                     reject(err);
                 } else {
                     logger.info('blog-post created');
-                    resolve();
+                    resolve(savedPost);
                 }
             });
         });
@@ -107,7 +107,6 @@ module.exports = class Database {
                 .sort({createdAt: 'desc'})
                 .exec((err, docs) => {
                     if (err) {
-                        console.error(err);
                         reject(err);
                     }
                     resolve(docs);
