@@ -14,6 +14,7 @@ module.exports = class BlogService {
         const protectMiddleware = expressJwt({secret: this.server.config.secret});
         
         this.router.get('/api/blog/posts', handleFetchBlogPosts.bind(this));
+        this.router.get('/api/blog/post/:id', handleFetchBlogPost.bind(this));
         this.router.post('/api/blog/post', protectMiddleware, handleCreateBlogPost.bind(this));
         this.router.delete('/api/blog/post/:id', protectMiddleware, handleDeleteBlogPost.bind(this));
         this.router.put('/api/blog/post/:id', protectMiddleware, handleUpdateBlogPost.bind(this));
@@ -38,6 +39,23 @@ function handleFetchBlogPosts(req, res) {
         .then((result) => {
             res.json(result);
         });
+}
+
+function handleFetchBlogPost(req, res) {
+    const idSchema         = Joi.string().alphanum().length(24).required();
+    const validationResult = Joi.validate(req.params.id, idSchema);
+    
+    if (validationResult.error) {
+        return res.status(400).send('Invalid Parameters');
+    }
+    
+    logger.debug('received valid fetch blog-post request');
+    this.db.fetchBlogPost(req.params.id)
+        .then((result) => {
+            res.json(result);
+        }).catch(err => {
+            res.sendStatus(404);
+    });
 }
 
 function handleCreateBlogPost(req, res) {

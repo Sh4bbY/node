@@ -113,6 +113,19 @@ module.exports = class Database {
         });
     }
     
+    fetchBlogPost(id) {
+        return new Promise((resolve, reject) => {
+            this.model.Post
+                .findOne({_id: id})
+                .exec((err, doc) => {
+                    if (err || !doc) {
+                        reject(err);
+                    }
+                    resolve(doc);
+                });
+        });
+    }
+    
     updateBlogPost(id, data) {
         return new Promise((resolve, reject) => {
             this.model.Post.findOneAndUpdate({_id: id}, {$set: data}, {new: true}, (err, doc) => {

@@ -77,11 +77,11 @@ describe('BlogService', () => {
         });
     });
     
-    describe('handleFetchBlogPost', () => {
+    describe('handleFetchBlogPosts', () => {
         it('should return status 400 if the request was invalid', (done) => {
             chai.request(server.app)
                 .get('/api/blog/posts')
-                .send({offest: 'asd'})
+                .send({offset: 'asd'})
                 .end((err, res) => {
                     assert.equal(res.status, 400);
                     done();
@@ -91,6 +91,35 @@ describe('BlogService', () => {
         it('should return status 200 if the request was valid', (done) => {
             chai.request(server.app)
                 .get('/api/blog/posts')
+                .end((err, res) => {
+                    assert.equal(res.status, 200);
+                    done();
+                });
+        });
+    });
+    
+    describe('handleFetchBlogPost', () => {
+        it('should return status 400 if the request was invalid', (done) => {
+            chai.request(server.app)
+                .get('/api/blog/post/invalid_id')
+                .end((err, res) => {
+                    assert.equal(res.status, 400);
+                    done();
+                });
+        });
+        
+        it('should return status 404 if the post could not be found', (done) => {
+            chai.request(server.app)
+                .get('/api/blog/post/abababababababababababab')
+                .end((err, res) => {
+                    assert.equal(res.status, 404);
+                    done();
+                });
+        });
+        
+        it('should return status 200 if the request was valid', (done) => {
+            chai.request(server.app)
+                .get('/api/blog/post/' + validBlogPostId)
                 .end((err, res) => {
                     assert.equal(res.status, 200);
                     done();
