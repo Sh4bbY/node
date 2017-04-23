@@ -6,8 +6,6 @@ const jwt        = require('jsonwebtoken');
 const logger     = require('log4js').getLogger('server');
 const Database   = require('../common/Database');
 const bcrypt     = require('bcrypt');
-const fs         = require('fs');
-const path       = require('path');
 
 // Todo Move to File/Db:
 const revokedTokens = [];

@@ -1,7 +1,6 @@
 'use strict';
 
 const assert    = require('chai').assert;
-const sinon     = require('sinon');
 const logger    = require('log4js').getLogger('server');
 const mongoose  = require('mongoose');
 const Mockgoose = require('mockgoose').Mockgoose;
@@ -26,17 +25,17 @@ describe('Database', () => {
         });
     });
     
-    describe('findUserByName', () => {
-        it('findUserByName', () => {
-            const db = new Database();
-            db.findUserByName();
-        });
-    });
-    
     describe('cleanUp', () => {
         it('cleans Up', () => {
             const db = new Database();
             db.cleanUp();
+        });
+    });
+    
+    describe('findUserByName', () => {
+        it('findUserByName', () => {
+            const db = new Database();
+            db.findUserByName();
         });
     });
     

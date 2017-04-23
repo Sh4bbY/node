@@ -1,33 +1,35 @@
 'use strict';
 
-const chai      = require('chai');
-const assert    = chai.assert;
-const chaiHttp  = require('chai-http');
 const logger    = require('log4js').getLogger('server');
 const mongoose  = require('mongoose');
+const chai      = require('chai');
+const chaiHttp  = require('chai-http');
 const Mockgoose = require('mockgoose').Mockgoose;
-const mockgoose = new Mockgoose(mongoose);
+const assert    = chai.assert;
+
+chai.use(chaiHttp);
 
 const Server      = require('../Server');
 const BlogService = require('./BlogService');
 
-chai.use(chaiHttp);
 logger.setLevel('off');
 
 describe('BlogService', () => {
     let server;
     let service;
     let validToken;
+    let validBlogPostId;
     
     before((done) => {
-        const config = {
+        const mockgoose = new Mockgoose(mongoose);
+        const config    = {
             'protocol': 'http',
             'port'    : 8101,
             'secret'  : 'LPjNP5H0#o1R(5}5r{8Iet5Bf8'
         };
-    
-        validToken   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU4ZmJmY2ZiMzQxMmYxNzRkNWIwZDFjYSIsIm5hbWUiOiJ0ZXN0LXVzZXIiLCJlbWFpbCI6InRlc3RAdXNlci5kZSIsImlhdCI6MTQ5MjkwOTMwN30.BhcL3atRuQroLTYwR1kDQQo6Vh6ZnV-sY0QKgxhf9DI';
-    
+        
+        validToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU4ZmJmY2ZiMzQxMmYxNzRkNWIwZDFjYSIsIm5hbWUiOiJ0ZXN0LXVzZXIiLCJlbWFpbCI6InRlc3RAdXNlci5kZSIsImlhdCI6MTQ5MjkwOTMwN30.BhcL3atRuQroLTYwR1kDQQo6Vh6ZnV-sY0QKgxhf9DI';
+        
         mockgoose.prepareStorage().then(() => {
             server  = new Server(config);
             service = new BlogService(server);
@@ -54,7 +56,6 @@ describe('BlogService', () => {
                 });
         });
         
-        
         it('should return status 200 if the request was valid', (done) => {
             const body = {
                 author: {
@@ -71,12 +72,24 @@ describe('BlogService', () => {
                 .send(body)
                 .end((err, res) => {
                     assert.equal(res.status, 200);
+                    assert.hasOwnProperty(res.body, '_id');
+                    validBlogPostId = res.body._id;
                     done();
                 });
         });
     });
     
     describe('handleFetchBlogPost', () => {
+        it('should return status 400 if the request was invalid', (done) => {
+            chai.request(server.app)
+                .get('/api/blog/posts')
+                .send({offest: 'asd'})
+                .end((err, res) => {
+                    assert.equal(res.status, 400);
+                    done();
+                });
+        });
+        
         it('should return status 200 if the request was valid', (done) => {
             chai.request(server.app)
                 .get('/api/blog/posts')
@@ -85,13 +98,56 @@ describe('BlogService', () => {
                     done();
                 });
         });
-        
+    });
+    
+    describe('handleUpdateBlogPost', () => {
         it('should return status 400 if the request was invalid', (done) => {
+            const body = {};
             chai.request(server.app)
-                .get('/api/blog/posts')
-                .send({offest: 'asd'})
+                .put('/api/blog/post/invalid_Id')
+                .set('Authorization', 'Bearer ' + validToken)
+                .send(body)
                 .end((err, res) => {
                     assert.equal(res.status, 400);
+                    done();
+                });
+        });
+        
+        it('should return status 200 if the request was valid', (done) => {
+            const post = {
+                title: 'This is a title changed by a test..',
+                body : '...and the Body was also changed by this test!'
+            };
+            chai.request(server.app)
+                .put('/api/blog/post/' + validBlogPostId)
+                .set('Authorization', 'Bearer ' + validToken)
+                .send(post)
+                .end((err, res) => {
+                    assert.equal(res.status, 200);
+                    assert.equal(res.body.title, post.title);
+                    assert.equal(res.body.body, post.body);
+                    done();
+                });
+        });
+    });
+    
+    describe('handleDeleteBlogPost', () => {
+        it('should return status 400 if the request was invalid', (done) => {
+            chai.request(server.app)
+                .delete('/api/blog/post/asdasd')
+                .set('Authorization', 'Bearer ' + validToken)
+                .end((err, res) => {
+                    assert.equal(res.status, 400);
+                    done();
+                });
+        });
+        
+        it('should return status 200 if the request was valid', (done) => {
+            chai.request(server.app)
+                .delete('/api/blog/post/' + validBlogPostId)
+                .set('Authorization', 'Bearer ' + validToken)
+                .end((err, res) => {
+                    assert.equal(res.status, 200);
                     done();
                 });
         });

@@ -1,18 +1,16 @@
 'use strict';
 
-const chai      = require('chai');
-const assert    = chai.assert;
-const chaiHttp  = require('chai-http');
 const logger    = require('log4js').getLogger('server');
 const mongoose  = require('mongoose');
+const chai      = require('chai');
+const chaiHttp  = require('chai-http');
 const Mockgoose = require('mockgoose').Mockgoose;
-const mockgoose = new Mockgoose(mongoose);
+const assert    = chai.assert;
+
+chai.use(chaiHttp);
 
 const Server      = require('../Server');
 const AuthService = require('./AuthService');
-
-
-chai.use(chaiHttp);
 
 logger.setLevel('off');
 
@@ -28,6 +26,7 @@ describe('AuthService', () => {
     let validToken;
     
     before((done) => {
+        const mockgoose = new Mockgoose(mongoose);
         const config = {
             'protocol': 'http',
             'port'    : 8101,

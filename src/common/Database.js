@@ -37,7 +37,8 @@ module.exports = class Database {
     }
     
     cleanUp() {
-        UserModel.collection.drop();
+        UserModel.collection.remove({});
+        BlogPostModel.collection.remove({});
     }
     
     findUserByName(name) {
@@ -55,7 +56,7 @@ module.exports = class Database {
     
     createUser(user) {
         return new Promise((resolve, reject) => {
-            bcrypt.hash(user.password, saltRounds).then(hash => {
+            return bcrypt.hash(user.password, saltRounds).then(hash => {
                 const dataRecord = {
                     name         : user.name,
                     password_hash: hash,
@@ -65,10 +66,10 @@ module.exports = class Database {
                 const userModel  = new UserModel(dataRecord);
                 userModel.save((err, savedUser) => {
                     if (err) {
-                        reject(err);
+                        return reject(err);
                     } else {
                         logger.info(`user ${savedUser.name} created`);
-                        resolve(savedUser);
+                        return resolve(savedUser);
                     }
                 });
             });
@@ -111,6 +112,28 @@ module.exports = class Database {
                     }
                     resolve(docs);
                 });
+        });
+    }
+    
+    updateBlogPost(id, data) {
+        return new Promise((resolve, reject) => {
+            BlogPostModel.findOneAndUpdate({_id: id}, {$set: data}, {new: true}, (err, doc) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(doc);
+            })
+        });
+    }
+    
+    deleteBlogPost(id) {
+        return new Promise((resolve, reject) => {
+            BlogPostModel.remove({_id: id}, (err, doc) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(doc);
+            });
         });
     }
 };
