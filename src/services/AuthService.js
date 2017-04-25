@@ -47,7 +47,7 @@ function handleLogin(req, res) {
     
     const {name, password} = req.body;
     
-    this.db.findUserByName(name)
+    this.db.query.user.findByName(name)
         .then(user => {
             if (user === null) {
                 logger.debug(`Ip ${req.ip} failed login for non-existing user ${name}`);
@@ -105,10 +105,10 @@ function handleRegistration(req, res) {
     }
     
     logger.debug('received valid registration request');
-    this.db.findUserByNameOrEmail(req.body.name, req.body.email)
+    this.db.query.user.findByNameOrEmail(req.body.name, req.body.email)
         .then(foundUser => {
                 if (foundUser === null) {
-                    this.db.createUser(req.body)
+                    this.db.query.user.create(req.body)
                         .then(user => {
                             return res.json({
                                 id       : user._id,

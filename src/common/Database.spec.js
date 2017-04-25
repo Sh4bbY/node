@@ -1,93 +1,60 @@
 'use strict';
 
-const assert    = require('chai').assert;
+const assert    = require('assert');
 const logger    = require('log4js').getLogger('server');
 const mongoose  = require('mongoose');
 const Mockgoose = require('mockgoose').Mockgoose;
+const Database  = require('./Database')
 const mockgoose = new Mockgoose(mongoose);
 
-let Database;
-let db;
 logger.setLevel('off');
 
 describe('Database', () => {
-    before((done) => {
-        mockgoose.prepareStorage().then(() => {
+    let db;
+    before(() => {
+        return mockgoose.prepareStorage().then(() => {
             const config = {
                 'port'    : 27017,
                 'host'    : 'localhost',
                 'database': 'test'
             };
-            Database     = require('./Database');
-            db           = new Database(config);
-            done();
+            
+            db = new Database(config);
         });
     });
     
     describe('connect', () => {
-        it('should connect', () => {
-            db.connect();
+        it('should connect to mocked mongodb', () => {
+            assert.equal(mongoose.connection.readyState, false);
+            
+            return db.connect().then(() => {
+                assert.equal(mongoose.connection.readyState, true);
+            });
         });
     });
     
     describe('cleanUp', () => {
-        it('cleans Up', () => {
-            db.cleanUp();
-        });
-    });
-    
-    describe('createUser', () => {
-        it('creates a User', (done) => {
-            const user = {
-                name    : 'dummy',
-                email   : 'someEmail',
-                password: 'somePw'
-            };
-            db.createUser(user).then(record => {
-                assert.hasOwnProperty(record, '_id');
-                done();
-            });
-        });
-    });
-    
-    describe('findUserByName', () => {
-        it('findUserByName', () => {
-            db.findUserByName('dummy').then(record => {
-                assert.hasOwnProperty(record, '_id');
-            });
-        });
-    });
-    
-    describe('createBlogPost', () => {
-        it('creates a BlogPost', (done) => {
-            const data = {
-                author: {
-                    name : 'some',
-                    email: 'some',
-                    id   : 'some'
-                },
-                title : 'some',
-                body  : 'some'
-            };
-            db.createBlogPost(data).then(postRecord => {
-                assert.hasOwnProperty(postRecord, '_id');
-                done();
-            });
-        });
-    });
-    
-    describe('fetchBlogPosts', () => {
-        it('creates a BlogPost', (done) => {
-            db.fetchBlogPosts().then(postRecords => {
-                assert.instanceOf(postRecords, Array);
-                done();
-            });
+        it('should remove all documents from all collections', () => {
+            return db.query.user.create({name: 'dummy', email: 'dummy@test.de', password: 'somePassword'})
+                .then(db.query.user.findByName('dummy'))
+                .then(user => {
+                    assert.equal(user.name, 'dummy');
+                    assert.ok(user._id);
+                })
+                .then(db.cleanUp())
+                .then(db.query.user.findByName('dummy'))
+                .then(user => {
+                    assert.equal(user, undefined);
+                });
         });
     });
     
     describe('disconnect', () => {
-        it('should disconnect', () => {
-            db.disconnect();
+        it('should disconnect from mocked mongodb', () => {
+            assert.equal(mongoose.connection.readyState, true);
+            db.disconnect().then(() => {
+                assert.equal(mongoose.connection.readyState, false);
+            });
         });
     });
 });

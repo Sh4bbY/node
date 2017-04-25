@@ -97,22 +97,21 @@ class Server {
         this.app.use(compression());                                    // use gzip compression for the response body
         this.app.use(bodyParser.urlencoded({extended: false}));         // parse application/x-www-form-urlencoded
         this.app.use(bodyParser.json());                                // parse application/json
-        //this.app.use(bearerToken());
         
         this.app.use(this.router);
         
-        this.app.use(Server._errorHandler);
+        this.app.use(errorHandler);
     }
-    
-    static _errorHandler(err, req, res, next) {
-        let status = 500;
-        //if error was thrown form express-jwt middleware
-        if (err.name === 'UnauthorizedError') {
-            status = 401;
-        }
-        logger.error('Express Error Handler: ', err.message);
-        return res.status(status).send(err.message);
+}
+
+function errorHandler(err, req, res, next) {
+    let status = 500;
+    //if error was thrown form express-jwt middleware
+    if (err.name === 'UnauthorizedError') {
+        status = 401;
     }
+    logger.error('Express Error Handler: ', err.message);
+    return res.status(status).send(err.message);
 }
 
 module.exports = Server;

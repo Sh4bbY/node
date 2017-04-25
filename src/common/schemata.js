@@ -1,13 +1,16 @@
 'use strict';
 
 module.exports = {
-    User: {
+    User        : {
         name         : String,
+        real_name    : String,
         password_hash: String,
         email        : String,
-        createdAt    : Date
+        createdAt    : Date,
+        lastVisit    : Date,
+        isVerified   : Boolean
     },
-    Post: {
+    Post        : {
         author   : {
             name : String,
             email: String,
@@ -16,5 +19,22 @@ module.exports = {
         title    : String,
         body     : String,
         createdAt: Date
+    },
+    Feedback    : {
+        author : String,
+        email  : String,
+        type   : String,
+        topic  : String,
+        message: String
+    },
+    Todo        : {
+        title: String,
+        items: [{
+            text    : String,
+            complete: Boolean
+        }]
+    },
+    RevokedToken: {
+        token: String
     }
 };

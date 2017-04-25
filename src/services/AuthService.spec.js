@@ -47,7 +47,6 @@ describe('AuthService', () => {
     });
     
     describe('handleRegistration', () => {
-        
         it('should return status 400 if the request was invalid', (done) => {
             const body = {};
             chai.request(server.app)
