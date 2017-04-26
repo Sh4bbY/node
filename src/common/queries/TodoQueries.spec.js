@@ -5,7 +5,6 @@ const logger    = require('log4js').getLogger('server');
 const mongoose  = require('mongoose');
 const Mockgoose = require('mockgoose').Mockgoose;
 const Database  = require('../Database');
-const mockgoose = new Mockgoose(mongoose);
 
 logger.setLevel('off');
 
@@ -15,6 +14,7 @@ describe('TodoQueries', () => {
     let itemId;
     
     before(() => {
+        const mockgoose = new Mockgoose(mongoose);
         return mockgoose.prepareStorage().then(() => {
             const config = {
                 'port'    : 27017,
@@ -78,6 +78,12 @@ describe('TodoQueries', () => {
         it(`should remove a item from a list and resolve that item`, () => {
             return db.query.todo.removeItem(listId, itemId).then(doc => {
                 assert.equal(String(doc._id), String(itemId));
+            });
+        });
+        
+        it(`should reject the item to delete could not be found`, () => {
+            return db.query.todo.removeItem(listId, '58ffd325bf8b0c4ffef1c181').catch((err) => {
+                assert.ok(true);
             });
         });
     });

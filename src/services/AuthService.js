@@ -47,13 +47,8 @@ function handleLogin(req, res) {
     
     const {name, password} = req.body;
     
-    this.db.query.user.findByName(name)
+    this.db.query.user.getByName(name)
         .then(user => {
-            if (user === null) {
-                logger.debug(`Ip ${req.ip} failed login for non-existing user ${name}`);
-                return res.status(400).send('invalid credentials');
-            }
-            
             bcrypt.compare(password, user.password_hash).then(isValid => {
                 if (isValid) {
                     const payload = {
@@ -68,6 +63,10 @@ function handleLogin(req, res) {
                     return res.status(400).send('invalid credentials');
                 }
             });
+        })
+        .catch(() => {
+            logger.debug(`Ip ${req.ip} failed login for non-existing user ${name}`);
+            return res.status(400).send('invalid credentials');
         });
 }
 
@@ -105,27 +104,25 @@ function handleRegistration(req, res) {
     }
     
     logger.debug('received valid registration request');
-    this.db.query.user.findByNameOrEmail(req.body.name, req.body.email)
-        .then(foundUser => {
-                if (foundUser === null) {
-                    this.db.query.user.create(req.body)
-                        .then(user => {
-                            return res.json({
-                                id       : user._id,
-                                name     : user.name,
-                                email    : user.email,
-                                createdAt: user.createdAt
-                            });
-                        })
-                        .catch(err => {
-                            logger.error('error creating user:', err);
-                            return res.sendStatus(500);
-                        });
-                } else {
-                    const msg = 'Name or Email already registered.';
-                    logger.error(msg);
-                    return res.sendStatus(400);
-                }
+    this.db.query.user.containsNameOrEmail(req.body.name, req.body.email).then(isContained => {
+            if (!isContained) {
+                this.db.query.user.create(req.body).then(user => {
+                    return res.json({
+                        id       : user._id,
+                        name     : user.name,
+                        email    : user.email,
+                        createdAt: user.createdAt
+                    });
+                }).catch(err => {
+                    logger.error('error creating user:', err);
+                    return res.sendStatus(500);
+                });
             }
-        );
+            else {
+                const msg = 'Name or Email already registered.';
+                logger.error(msg);
+                return res.sendStatus(400);
+            }
+        }
+    );
 }

@@ -1,13 +1,13 @@
 'use strict';
 
-const mongoose            = require('mongoose');
-const logger              = require('log4js').getLogger('server');
-const schemata            = require('./schemata');
-const BlogQueries         = require('./queries/BlogQueries');
-const UserQueries         = require('./queries/UserQueries');
-const RevokedTokenQueries = require('./queries/RevokedTokenQueries');
-const TodoQueries         = require('./queries/TodoQueries');
-mongoose.Promise          = Promise;
+const mongoose    = require('mongoose');
+const logger      = require('log4js').getLogger('server');
+const schemata    = require('./schemata');
+const Queries     = require('./queries/Queries');
+const BlogQueries = require('./queries/BlogQueries');
+const UserQueries = require('./queries/UserQueries');
+const TodoQueries = require('./queries/TodoQueries');
+mongoose.Promise  = Promise;
 
 module.exports = class Database {
     constructor(config) {
@@ -24,10 +24,11 @@ module.exports = class Database {
         });
         
         this.query = {
-            blog   : new BlogQueries(this.model.Post),
-            user   : new UserQueries(this.model.User),
-            revoked: new RevokedTokenQueries(this.model.RevokedToken),
-            todo   : new TodoQueries(this.model.Todo)
+            blog    : new BlogQueries(this.model.Post),
+            user    : new UserQueries(this.model.User),
+            todo    : new TodoQueries(this.model.Todo),
+            feedback: new Queries(this.model.Feedback),
+            revoked : new Queries(this.model.RevokedToken)
         }
         ;
     }

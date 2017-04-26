@@ -1,11 +1,11 @@
 'use strict';
 
+const assert    = require('assert');
 const logger    = require('log4js').getLogger('server');
 const mongoose  = require('mongoose');
 const chai      = require('chai');
 const chaiHttp  = require('chai-http');
 const Mockgoose = require('mockgoose').Mockgoose;
-const assert    = chai.assert;
 
 chai.use(chaiHttp);
 
@@ -27,23 +27,22 @@ describe('AuthService', () => {
     let service;
     let validToken;
     
-    before((done) => {
+    before(() => {
         const mockgoose = new Mockgoose(mongoose);
         
         validToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU4Zjk0NjY3ODdmOTAzNmZkZjQxM2YyZCIsIm5hbWUiOiJzaGFiYnkiLCJlbWFpbCI6ImFzZEBhc2QuZGUiLCJpYXQiOjE0OTI5MDIwOTJ9.J-OO_LX1NplMfKn4yyY17f796smBVVGSLuYOtntug8s';
         
-        mockgoose.prepareStorage().then(() => {
+        return mockgoose.prepareStorage().then(() => {
             server = new Server(config.server);
             server.registerDb('mongo', new Database(config.mongodb));
             service = new AuthService(server);
             server.registerService(service);
             server.start();
-            done();
         });
     });
     
-    after((done) => {
-        server.stop().then(() => done());
+    after(() => {
+        return server.stop();
     });
     
     describe('handleRegistration', () => {
@@ -74,22 +73,6 @@ describe('AuthService', () => {
                 });
         });
         
-        it('should return status 400 if user name or email is already registered', (done) => {
-            const body = {
-                name          : 'dummy',
-                email         : validUser.email,
-                password      : 'passwordA',
-                password_check: 'passwordA'
-            };
-            chai.request(server.app)
-                .post('/api/registration')
-                .send(body)
-                .end((err, res) => {
-                    assert.equal(res.status, 400);
-                    done();
-                });
-        });
-        
         it('should return status 200 if request was valid', (done) => {
             const body = {
                 name          : validUser.name,
@@ -102,6 +85,22 @@ describe('AuthService', () => {
                 .send(body)
                 .end((err, res) => {
                     assert.equal(res.status, 200);
+                    done();
+                });
+        });
+        
+        it('should return status 400 if user name or email is already registered', (done) => {
+            const body = {
+                name          : 'dummy',
+                email         : validUser.email,
+                password      : 'passwordA',
+                password_check: 'passwordA'
+            };
+            chai.request(server.app)
+                .post('/api/registration')
+                .send(body)
+                .end((err, res) => {
+                    assert.equal(res.status, 400);
                     done();
                 });
         });

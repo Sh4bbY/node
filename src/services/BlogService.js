@@ -35,7 +35,7 @@ function handleFetchBlogPosts(req, res) {
     }
     
     logger.debug('received valid fetch blog-posts request');
-    this.db.query.blog.fetchPosts(req.body)
+    this.db.query.blog.get(req.body)
         .then((result) => {
             res.json(result);
         });
@@ -50,7 +50,7 @@ function handleFetchBlogPost(req, res) {
     }
     
     logger.debug('received valid fetch blog-post request');
-    this.db.query.blog.fetchPost(req.params.id)
+    this.db.query.blog.getById(req.params.id)
         .then((result) => {
             res.json(result);
         }).catch(err => {
@@ -77,7 +77,7 @@ function handleCreateBlogPost(req, res) {
     }
     
     logger.debug('received valid blog-post creation request');
-    this.db.query.blog.createPost(req.body)
+    this.db.query.blog.add(req.body)
         .then((blogPost) => {
             return res.json(blogPost);
         });
@@ -103,7 +103,7 @@ function handleUpdateBlogPost(req, res) {
     }
     
     logger.debug('received valid update blog-post request');
-    this.db.query.blog.updatePost(req.params.id, req.body)
+    this.db.query.blog.update(req.params.id, req.body)
         .then((result) => {
             res.json(result);
         });
@@ -118,8 +118,9 @@ function handleDeleteBlogPost(req, res) {
     }
     
     logger.debug('received valid delete blog-post request');
-    this.db.query.blog.deletePost(req.params.id)
+    this.db.query.blog.remove(req.params.id)
         .then((result) => {
             res.json(result);
-        });
+        })
+        .catch(err => console.log(err));
 }

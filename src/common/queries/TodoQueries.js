@@ -1,37 +1,19 @@
 'use strict';
 
-const logger = require('log4js').getLogger('server');
+const Queries = require('./Queries');
+const logger  = require('log4js').getLogger('server');
 
-module.exports = class TodoQueries {
-    constructor(model) {
-        this.model = model;
-    }
-    
+module.exports = class TodoQueries extends Queries {
     addList(title) {
-        return new Promise((resolve, reject) => {
-            const todoModel = new this.model({title: title, items: []});
-            todoModel.save((err, doc) => {
-                if (err) {
-                    return reject(err);
-                }
-                
-                logger.info(`added todo-list "${doc.title}"`);
-                return resolve(doc);
-            });
-        });
+        return super.add({title: title, items: []});
     }
     
     updateList(listId, title) {
-        return new Promise((resolve, reject) => {
-            this.model.findByIdAndUpdate(listId, {$set: {title: title}}, {new: true}, (err, doc) => {
-                logger.debug(`updated todo-list title to "${doc.title}"`);
-                return resolve(doc);
-            });
-        });
+        return super.update(listId, {title: title});
     }
     
     addItem(listId, text) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             this.model.findById(listId).then(doc => {
                 doc.items.push({
                     text    : text,
@@ -48,6 +30,9 @@ module.exports = class TodoQueries {
         return new Promise((resolve, reject) => {
             this.model.findById(listId).then(doc => {
                 const item = doc.items.id(itemId);
+                if(!item){
+                    return reject(`item with id ${itemId} could not be found`);
+                }
                 item.text  = text;
                 doc.save(() => {
                     resolve(item);
@@ -56,13 +41,14 @@ module.exports = class TodoQueries {
         });
     }
     
-    
     toggleItem(listId, itemId) {
         return new Promise((resolve, reject) => {
             this.model.findById(listId).then(doc => {
                 const item    = doc.items.id(itemId);
+                if(!item){
+                    return reject(`item with id ${itemId} could not be found`);
+                }
                 item.complete = !item.complete;
-                
                 doc.save(() => {
                     resolve(item);
                 });
@@ -74,6 +60,9 @@ module.exports = class TodoQueries {
         return new Promise((resolve, reject) => {
             this.model.findById(listId).then(doc => {
                 const item = doc.items.id(itemId);
+                if(!item){
+                    return reject(`item with id ${itemId} could not be found`);
+                }
                 doc.items.pull(item);
                 doc.save(() => {
                     resolve(item);
@@ -83,14 +72,6 @@ module.exports = class TodoQueries {
     }
     
     removeList(listId) {
-        return new Promise((resolve, reject) => {
-            this.model.findByIdAndRemove(listId, (err, doc) => {
-                if (err) {
-                    rejcet(err);
-                }
-                resolve(doc);
-            });
-        });
+        return super.remove(listId);
     }
-}
-;
+};
