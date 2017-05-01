@@ -6,6 +6,7 @@ const bodyParser  = require('body-parser');
 const bearerToken = require('express-bearer-token');
 const logger      = require('log4js').getLogger('server');
 const Joi         = require('joi');
+const socketIo    = require('socket.io');
 
 const configSchema = Joi.object().keys({
     protocol: Joi.string().valid('http', 'https').required(),
@@ -20,11 +21,12 @@ class Server {
             validationResult.error.details.forEach(err => logger.error(err.message));
             throw new Error('Invalid Configuration', validationResult.error);
         }
-        this.config   = config;
-        this.app      = express();
-        this.router   = express.Router();
-        this.services = [];
-        this.db       = {};
+        this.config       = config;
+        this.app          = express();
+        this.router       = express.Router();
+        this.services     = [];
+        this.connectionCb = [];
+        this.db           = {};
     }
     
     /**
@@ -39,6 +41,9 @@ class Server {
             this.server = require(this.config.protocol).createServer(this.app);
             this.server.listen(this.config.port, () => {
                 logger.info(`Server is started and listening on port ${this.config.port}`);
+                
+                this.connectionCb.forEach(cb => cb());
+                
                 return resolve(this.server);
             });
             this.server.on('error', err => {
@@ -73,6 +78,10 @@ class Server {
                 return resolve();
             });
         });
+    }
+    
+    onConnection(handler) {
+        this.connectionCb.push(handler);
     }
     
     /**
