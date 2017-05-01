@@ -1,9 +1,17 @@
 'use strict';
 
-const Joi        = require('joi');
-const expressJwt = require('express-jwt');
-const jwt        = require('jsonwebtoken');
-const logger     = require('log4js').getLogger('server');
+const Joi         = require('joi');
+const expressJwt  = require('express-jwt');
+const jwt         = require('jsonwebtoken');
+const marked      = require('marked');
+const highlightjs = require('highlightjs');
+const logger      = require('log4js').getLogger('server');
+
+marked.setOptions({
+    highlight: function (code) {
+        return highlightjs.highlightAuto(code).value;
+    }
+});
 
 module.exports = class BlogService {
     constructor(server) {
@@ -35,10 +43,10 @@ function handleFetchBlogPosts(req, res) {
     }
     
     logger.debug('received valid fetch blog-posts request');
-    this.db.query.blog.get(req.body)
-        .then((result) => {
-            res.json(result);
-        });
+    this.db.query.blog.get(req.body).then((posts) => {
+        posts.forEach(post => post.body = marked(post.body));
+        res.json(posts);
+    });
 }
 
 function handleFetchBlogPost(req, res) {

@@ -6,7 +6,6 @@ const bodyParser  = require('body-parser');
 const bearerToken = require('express-bearer-token');
 const logger      = require('log4js').getLogger('server');
 const Joi         = require('joi');
-const socketIo    = require('socket.io');
 
 const configSchema = Joi.object().keys({
     protocol: Joi.string().valid('http', 'https').required(),

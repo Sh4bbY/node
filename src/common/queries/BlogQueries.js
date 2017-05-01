@@ -8,4 +8,11 @@ module.exports = class BlogQueries extends Queries {
         blogPostData.createdAt = Date.now();
         return super.add(blogPostData);
     }
+    
+    get(settings) {
+        if (!settings.hasOwnProperty('sort')) {
+            settings.sort = {createdAt: 'desc'};
+        }
+        return super.get(settings);
+    }
 };
