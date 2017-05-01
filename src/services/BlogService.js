@@ -30,20 +30,22 @@ module.exports = class BlogService {
 };
 
 function handleFetchBlogPosts(req, res) {
-    const requestSchema = Joi.object().keys({
+    const requestSchema    = Joi.object().keys({
         offset: Joi.number().min(0),
         limit : Joi.number().min(0)
     }).required().options({abortEarly: false});
-    
-    const validationResult = Joi.validate(req.body, requestSchema);
+    const validationResult = Joi.validate(req.query, requestSchema);
     
     if (validationResult.error) {
         validationResult.error.details.forEach(err => logger.error(err.message));
         return res.status(400).send('Invalid Parameters');
     }
     
+    const options = {};
+    Object.keys(req.query).forEach(key => options[key] = parseInt(req.query[key]));
+    
     logger.debug('received valid fetch blog-posts request');
-    this.db.query.blog.get(req.body).then((posts) => {
+    this.db.query.blog.get(options).then((posts) => {
         posts.forEach(post => post.body = marked(post.body));
         res.json(posts);
     });

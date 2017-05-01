@@ -1,7 +1,6 @@
 'use strict';
 
-const Queries = require('./Queries');
-const logger  = require('log4js').getLogger('server');
+const Queries = require('./Queries');;
 
 module.exports = class BlogQueries extends Queries {
     add(blogPostData) {

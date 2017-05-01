@@ -80,8 +80,7 @@ describe('BlogService', () => {
     describe('handleFetchBlogPosts', () => {
         it('should return status 400 if the request was invalid', (done) => {
             chai.request(server.app)
-                .get('/api/blog/posts')
-                .send({offset: 'asd'})
+                .get('/api/blog/posts?offset=asd')
                 .end((err, res) => {
                     assert.equal(res.status, 400);
                     done();

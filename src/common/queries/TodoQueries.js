@@ -30,10 +30,10 @@ module.exports = class TodoQueries extends Queries {
         return new Promise((resolve, reject) => {
             this.model.findById(listId).then(doc => {
                 const item = doc.items.id(itemId);
-                if(!item){
+                if (!item) {
                     return reject(`item with id ${itemId} could not be found`);
                 }
-                item.text  = text;
+                item.text = text;
                 doc.save(() => {
                     resolve(item);
                 });
@@ -44,8 +44,8 @@ module.exports = class TodoQueries extends Queries {
     toggleItem(listId, itemId) {
         return new Promise((resolve, reject) => {
             this.model.findById(listId).then(doc => {
-                const item    = doc.items.id(itemId);
-                if(!item){
+                const item = doc.items.id(itemId);
+                if (!item) {
                     return reject(`item with id ${itemId} could not be found`);
                 }
                 item.complete = !item.complete;
@@ -60,7 +60,7 @@ module.exports = class TodoQueries extends Queries {
         return new Promise((resolve, reject) => {
             this.model.findById(listId).then(doc => {
                 const item = doc.items.id(itemId);
-                if(!item){
+                if (!item) {
                     return reject(`item with id ${itemId} could not be found`);
                 }
                 doc.items.pull(item);
