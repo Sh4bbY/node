@@ -72,6 +72,6 @@ module.exports = class TodoQueries extends Queries {
     }
     
     removeList(listId) {
-        return super.remove(listId);
+        return super.removeById(listId);
     }
 };

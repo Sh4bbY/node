@@ -103,15 +103,15 @@ describe('Queries', () => {
         });
     });
     
-    describe('remove', () => {
+    describe('removeById', () => {
         it(`should remove the item and resolve if the item was found`, () => {
-            return query.remove(id).then(() => {
+            return query.removeById(id).then(() => {
                 assert.ok(true);
             });
         });
         
         it(`should fail to remove the item and reject if the item could not be found`, () => {
-            return query.remove('invalidId').catch(() => {
+            return query.removeById('invalidId').catch(() => {
                 assert.ok(true);
             });
         });

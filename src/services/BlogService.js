@@ -128,7 +128,7 @@ function handleDeleteBlogPost(req, res) {
     }
     
     logger.debug('received valid delete blog-post request');
-    this.db.query.blog.remove(req.params.id)
+    this.db.query.blog.removeById(req.params.id)
         .then((result) => {
             res.json(result);
         })

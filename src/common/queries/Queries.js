@@ -55,7 +55,8 @@ module.exports = class Queries {
     
     get(options) {
         return new Promise((resolve, reject) => {
-            let query = this.model.find({});
+            const selector = options ? options.find || {} : {};
+            let query = this.model.find(selector);
             if (options instanceof Object) {
                 if (options.hasOwnProperty('sort')) {
                     query = query.sort(options.sort);
@@ -84,9 +85,20 @@ module.exports = class Queries {
         });
     }
     
-    remove(id) {
+    removeById(id) {
         return new Promise((resolve, reject) => {
             this.model.findByIdAndRemove(id, (err, doc) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(doc);
+            });
+        });
+    }
+    
+    remove(item) {
+        return new Promise((resolve, reject) => {
+            this.model.find(item).remove().exec((err, doc) => {
                 if (err) {
                     reject(err);
                 }

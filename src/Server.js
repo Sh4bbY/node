@@ -114,8 +114,7 @@ class Server {
 
 function errorHandler(err, req, res, next) {
     let status = 500;
-    //if error was thrown form express-jwt middleware
-    if (err.name === 'UnauthorizedError') {
+    if (err.name === 'UnauthorizedError') { // error from express-jwt middleware
         status = 401;
     }
     logger.error('Express Error Handler: ', err.message);

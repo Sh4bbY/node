@@ -6,16 +6,6 @@ const jwt        = require('jsonwebtoken');
 const logger     = require('log4js').getLogger('server');
 const bcrypt     = require('bcrypt');
 
-// Todo Move to File/Db:
-const revokedTokens = [];
-
-function isRevokedCallback(req, payload, done) {
-    const issuer  = payload.iss;
-    const tokenId = payload.jti;
-    
-    const isRevoked = revokedTokens.indexOf(req.token) !== -1;
-    return done(null, isRevoked);
-}
 
 module.exports = class AuthService {
     constructor(server) {
@@ -27,7 +17,7 @@ module.exports = class AuthService {
         this.router.post('/api/loginByToken', handleLoginByToken.bind(this));
         this.router.post('/api/registration', handleRegistration.bind(this));
         this.router.get('/api/logout',
-            expressJwt({secret: server.config.secret, isRevoked: isRevokedCallback}),
+            expressJwt({secret: server.config.secret, isRevoked: isRevokedCallback.bind(this)}),
             handleLogout.bind(this));
     }
 };
@@ -56,7 +46,7 @@ function handleLogin(req, res) {
                         name : user.name,
                         email: user.email
                     };
-                    return res.json({token: jwt.sign(payload, this.server.config.secret)});
+                    return res.json({token: jwt.sign(payload, this.server.config.secret, {expiresIn: '7d'})});
                 }
                 else {
                     logger.warn(`Ip ${req.ip} failed login for user ${name}`);
@@ -81,8 +71,13 @@ function handleLoginByToken(req, res) {
 }
 
 function handleLogout(req, res) {
-    revokedTokens.push(req.token);
-    res.sendStatus(200);
+    const payload = jwt.decode(req.token, this.server.config.secret);
+    
+    removeExpiredTokens.call(this)
+        .then(this.db.query.revoked.add({token: req.token, exp: payload.exp}))
+        .then(() => {
+            res.sendStatus(200);
+        });
 }
 
 function handleRegistration(req, res) {
@@ -126,3 +121,15 @@ function handleRegistration(req, res) {
         }
     );
 }
+
+function isRevokedCallback(req, payload, done) {
+    this.db.query.revoked.contains({token: req.token})
+        .then(isRevoked => done(null, isRevoked));
+}
+
+
+function removeExpiredTokens() {
+    const now = Math.floor(Date.now() / 1000);
+    return this.db.query.revoked.remove({exp: {$lt: now}});
+}
+

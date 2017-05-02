@@ -81,7 +81,7 @@ function handleDeleteFeedback(req, res) {
     }
     
     logger.debug('received valid delete feedback request');
-    this.db.query.feedback.remove(req.params.id)
+    this.db.query.feedback.removeById(req.params.id)
         .then((result) => res.json(result))
         .catch(err => console.log(err));
 }

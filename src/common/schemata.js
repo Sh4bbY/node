@@ -35,6 +35,7 @@ module.exports = {
         }]
     },
     RevokedToken: {
-        token: String
+        token: String,
+        exp: Number,
     }
 };
