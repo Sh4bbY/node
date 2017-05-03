@@ -4,7 +4,7 @@
   "description": "a node and express based backend application",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js 'src/**/*.js'",
+    "start": "DEBUG=* nodemon index.js 'src/**/*.js'",
     "test": "nyc mocha --timeout 60000 --recursive src",
     "lint": "jshint src"
   },

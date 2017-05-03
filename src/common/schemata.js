@@ -36,6 +36,11 @@ module.exports = {
     },
     RevokedToken: {
         token: String,
-        exp: Number,
+        exp  : Number
+    },
+    Chat        : {
+        author   : String,
+        message  : String,
+        createdAt: Date
     }
 };

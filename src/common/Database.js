@@ -28,6 +28,7 @@ module.exports = class Database {
             user    : new UserQueries(this.model.User),
             todo    : new TodoQueries(this.model.Todo),
             feedback: new Queries(this.model.Feedback),
+            chat    : new Queries(this.model.Chat),
             revoked : new Queries(this.model.RevokedToken)
         }
         ;
