@@ -1,17 +1,10 @@
 'use strict';
 
-const Joi         = require('joi');
-const expressJwt  = require('express-jwt');
-const jwt         = require('jsonwebtoken');
-const marked      = require('marked');
-const highlightjs = require('highlightjs');
-const logger      = require('log4js').getLogger('server');
-
-marked.setOptions({
-    highlight: function (code) {
-        return highlightjs.highlightAuto(code).value;
-    }
-});
+const Joi        = require('joi');
+const expressJwt = require('express-jwt');
+const jwt        = require('jsonwebtoken');
+const marked     = require('marked');
+const logger     = require('log4js').getLogger('server');
 
 module.exports = class BlogService {
     constructor(server) {
