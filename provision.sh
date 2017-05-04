@@ -13,6 +13,10 @@ VBOX_VERSION=5.1.18
 echo "
 ================> Environment Setup"
 
+yum clean all
+yum clean expire-cache
+yum update
+
 echo " --> install Group 'development tools'"
 yum groupinstall -q -y 'Development Tools'
 
@@ -58,7 +62,7 @@ if [ $DESKTOP ]
     ================> Desktop Setup"
 
     echo " --> install libs necessary for guest additions"
-    yum install -q -y kernel-devel
+    yum install -q -y kernel-devel-$(uname -r)
     yum groupinstall -q -y "X Window System"
 
     echo " --> mount and install guest additions for Virtualbox $VBOX_VERSION"
@@ -84,8 +88,6 @@ if [ $DESKTOP ]
     echo " --> install Firefox"
     yum -q -y install firefox
 fi
-
-yum clean all
 
 echo "
 ------- provisioning complete ---------
