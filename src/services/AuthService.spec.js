@@ -59,10 +59,10 @@ describe('AuthService', () => {
         
         it('should return status 400 if passwords do not match', (done) => {
             const body = {
-                name          : validUser.name,
-                email         : validUser.email,
-                password      : 'passwordA',
-                password_check: 'passwordB'
+                name            : validUser.name,
+                email           : validUser.email,
+                password        : 'passwordA',
+                password_confirm: 'passwordB'
             };
             chai.request(server.app)
                 .post('/api/registration')
@@ -75,10 +75,10 @@ describe('AuthService', () => {
         
         it('should return status 200 if request was valid', (done) => {
             const body = {
-                name          : validUser.name,
-                email         : validUser.email,
-                password      : validUser.password,
-                password_check: validUser.password
+                name            : validUser.name,
+                email           : validUser.email,
+                password        : validUser.password,
+                password_confirm: validUser.password
             };
             chai.request(server.app)
                 .post('/api/registration')
@@ -91,10 +91,10 @@ describe('AuthService', () => {
         
         it('should return status 400 if user name or email is already registered', (done) => {
             const body = {
-                name          : 'dummy',
-                email         : validUser.email,
-                password      : 'passwordA',
-                password_check: 'passwordA'
+                name            : 'dummy',
+                email           : validUser.email,
+                password        : 'passwordA',
+                password_confirm: 'passwordA'
             };
             chai.request(server.app)
                 .post('/api/registration')

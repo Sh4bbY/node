@@ -85,7 +85,7 @@ function handleRegistration(req, res) {
         name          : Joi.string().min(3).max(15).required(),
         email         : Joi.string().email().required(),
         password      : Joi.string().min(6).required(),
-        password_check: Joi.string().min(6).required()
+        password_confirm: Joi.string().min(6).required()
     }).required().options({abortEarly: false});
     
     const validationResult = Joi.validate(req.body, requestSchema);
@@ -94,7 +94,7 @@ function handleRegistration(req, res) {
         validationResult.error.details.forEach(err => logger.error(err.message));
         return res.status(400).send('invalid parameters')
     }
-    if (req.body.password !== req.body.password_check) {
+    if (req.body.password !== req.body.password_confirm) {
         return res.status(400).send('passwords do not match')
     }
     
