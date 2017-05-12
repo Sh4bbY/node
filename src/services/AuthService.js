@@ -20,6 +20,12 @@ module.exports = class AuthService {
             expressJwt({secret: server.config.secret, isRevoked: isRevokedCallback.bind(this)}),
             handleLogout.bind(this));
     }
+    
+    createTokenResponse(payload) {
+        return {
+            token: jwt.sign(payload, this.server.config.secret, {expiresIn: '7d'})
+        };
+    }
 };
 
 function handleLogin(req, res) {
@@ -46,7 +52,7 @@ function handleLogin(req, res) {
                         name : user.name,
                         email: user.email
                     };
-                    return res.json({token: jwt.sign(payload, this.server.config.secret, {expiresIn: '7d'})});
+                    return res.json(this.createTokenResponse(payload));
                 }
                 else {
                     logger.warn(`Ip ${req.ip} failed login for user ${name}`);
@@ -102,12 +108,12 @@ function handleRegistration(req, res) {
     this.db.query.user.containsNameOrEmail(req.body.name, req.body.email).then(isContained => {
             if (!isContained) {
                 this.db.query.user.create(req.body).then(user => {
-                    return res.json({
-                        id       : user._id,
-                        name     : user.name,
-                        email    : user.email,
-                        createdAt: user.createdAt
-                    });
+                    const payload = {
+                        id   : user._id,
+                        name : user.name,
+                        email: user.email
+                    };
+                    return res.json(this.createTokenResponse(payload));
                 }).catch(err => {
                     logger.error('error creating user:', err);
                     return res.sendStatus(500);
@@ -116,7 +122,7 @@ function handleRegistration(req, res) {
             else {
                 const msg = 'Name or Email already registered.';
                 logger.error(msg);
-                return res.sendStatus(400);
+                return res.sendStatus(406);
             }
         }
     );
