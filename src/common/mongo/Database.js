@@ -29,9 +29,9 @@ module.exports = class Database {
             todo    : new TodoQueries(this.model.Todo),
             feedback: new Queries(this.model.Feedback),
             chat    : new Queries(this.model.Chat),
-            revoked : new Queries(this.model.RevokedToken)
-        }
-        ;
+            revoked : new Queries(this.model.RevokedToken),
+            tweet   : new Queries(this.model.Tweet)
+        };
     }
     
     connect() {

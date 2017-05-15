@@ -3,6 +3,7 @@
 const express     = require('express');
 const compression = require('compression');
 const bodyParser  = require('body-parser');
+const session     = require('express-session');
 const bearerToken = require('express-bearer-token');
 const logger      = require('log4js').getLogger('server');
 const Joi         = require('joi');
@@ -102,6 +103,11 @@ class Server {
     
     _registerMiddleware() {
         this.app.use(bearerToken());
+        this.app.use(session({
+            secret: "very secret",
+            resave: false,
+            saveUninitialized: true
+        }));                                    // use gzip compression for the response body
         this.app.use(compression());                                    // use gzip compression for the response body
         this.app.use(bodyParser.urlencoded({extended: false}));         // parse application/x-www-form-urlencoded
         this.app.use(bodyParser.json());                                // parse application/json

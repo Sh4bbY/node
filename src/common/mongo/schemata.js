@@ -42,5 +42,12 @@ module.exports = {
         author   : String,
         message  : String,
         createdAt: Date
+    },
+    Tweet       : {
+        id            : String,
+        text          : String,
+        created_at    : Date,
+        retweet_count : Number,
+        favorite_count: Number
     }
 };

@@ -11,7 +11,7 @@ chai.use(chaiHttp);
 
 const config      = require('../../config.json');
 const Server      = require('../Server');
-const Database    = require('../common/Database');
+const Database    = require('../common/mongo/Database');
 const BlogService = require('./BlogService');
 
 logger.setLevel('off');

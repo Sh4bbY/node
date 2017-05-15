@@ -1,12 +1,21 @@
 {
-  "server" : {
+  "server"       : {
     "protocol": "http",
     "port"    : 8001,
     "secret"  : "LPjNP5H0#o1R(5}5r{8Iet5Bf8"
   },
-  "mongodb": {
+  "mongodb"      : {
     "port"    : 27017,
     "host"    : "localhost",
     "database": "test"
+  },
+  "elasticsearch": {
+    "port": 9200,
+    "host": "localhost",
+    "log" : "trace"
+  },
+  "mysql"        : {
+    "port": 3306,
+    "host": "localhost"
   }
 }

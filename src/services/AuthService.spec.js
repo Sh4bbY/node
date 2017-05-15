@@ -11,7 +11,7 @@ chai.use(chaiHttp);
 
 const config      = require('../../config.json');
 const Server      = require('../Server');
-const Database    = require('../common/Database');
+const Database    = require('../common/mongo/Database');
 const AuthService = require('./AuthService');
 
 logger.setLevel('off');
@@ -100,7 +100,7 @@ describe('AuthService', () => {
                 .post('/api/registration')
                 .send(body)
                 .end((err, res) => {
-                    assert.equal(res.status, 406);
+                    assert.equal(res.status, 400);
                     done();
                 });
         });
