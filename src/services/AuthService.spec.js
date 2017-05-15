@@ -89,7 +89,7 @@ describe('AuthService', () => {
                 });
         });
         
-        it('should return status 400 if user name or email is already registered', (done) => {
+        it('should return status 406 - Not Acceptable if user name or email is already registered', (done) => {
             const body = {
                 name            : 'dummy',
                 email           : validUser.email,
@@ -100,7 +100,7 @@ describe('AuthService', () => {
                 .post('/api/registration')
                 .send(body)
                 .end((err, res) => {
-                    assert.equal(res.status, 400);
+                    assert.equal(res.status, 406);
                     done();
                 });
         });
