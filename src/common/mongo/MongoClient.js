@@ -9,7 +9,7 @@ const UserQueries = require('./queries/UserQueries');
 const TodoQueries = require('./queries/TodoQueries');
 mongoose.Promise  = Promise;
 
-module.exports = class Database {
+module.exports = class MongoClient {
     constructor(config) {
         this.config = config;
         this.model  = {};

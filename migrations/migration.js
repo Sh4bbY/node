@@ -1,5 +1,5 @@
 'use strict';
-const Database = require('../src/common/mongo/Database');
+const Database = require('../src/common/mongo/MongoClient');
 const config   = require('../config.json');
 const db       = new Database(config.mongodb);
 

@@ -104,7 +104,7 @@ class Server {
     _registerMiddleware() {
         this.app.use(bearerToken());
         this.app.use(session({
-            secret: "very secret",
+            secret: 'very secret',
             resave: false,
             saveUninitialized: true
         }));                                    // use gzip compression for the response body

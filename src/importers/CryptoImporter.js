@@ -11,7 +11,7 @@ module.exports = class CryptoService {
     constructor(server) {
         this.server = server;
         this.router = server.router;
-        this.db     = server.db.elasticSearch;
+        this.db     = server.db.elastic;
     }
     
     importData() {

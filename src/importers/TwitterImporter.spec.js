@@ -1,30 +1,37 @@
 'use strict';
 
-const assert   = require('assert');
-const logger   = require('log4js').getLogger('server');
-const mongoose = require('mongoose');
-const chai     = require('chai');
-const chaiHttp = require('chai-http');
+const assert = require('assert');
+const logger = require('log4js').getLogger('server');
 
-chai.use(chaiHttp);
-
-const config          = require('../../config.json');
 const Server          = require('../Server');
-const Database        = require('../common/elasticsearch/Database');
+const ElasticClient   = require('../common/elastic/ElasticClient');
 const TwitterImporter = require('./TwitterImporter');
+
+const config = {
+    express      : {
+        protocol: 'http',
+        port    : 8888,
+        secret  : 'test-secret-1234567890'
+    },
+    elasticsearch: {
+        port: 9200,
+        host: 'localhost',
+        log : 'error'
+    }
+};
 
 logger.setLevel('debug');
 
 describe('TwitterService', () => {
     let server;
     let importer;
-    let esClient;
+    let db;
     
     before(() => {
-        server   = new Server(config.server);
-        esClient = new Database(Object.assign({}, config.elasticsearch, {log: 'error'}));
-        server.registerDb('elasticSearch', esClient);
+        server   = new Server(config.express);
+        db       = new ElasticClient(config.elasticsearch);
         importer = new TwitterImporter(server);
+        server.registerDb('elastic', db);
         server.registerService(importer);
         server.start();
     });
@@ -46,7 +53,7 @@ describe('TwitterService', () => {
     xdescribe('retrieve TwitterData', () => {
         it('should ...', function (done) {
             this.timeout(20000);
-            esClient.search('tweets', 'ethereumproject').then(result => {
+            db.search('tweets', 'ethereumproject').then(result => {
                 console.log('RESULT: ', result);
                 done();
             });

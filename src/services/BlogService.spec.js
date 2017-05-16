@@ -9,31 +9,41 @@ const assert    = chai.assert;
 
 chai.use(chaiHttp);
 
-const config      = require('../../config.json');
 const Server      = require('../Server');
-const Database    = require('../common/mongo/Database');
+const MongoClient = require('../common/mongo/MongoClient');
 const BlogService = require('./BlogService');
+
+const config = {
+    express: {
+        protocol: 'http',
+        port    : 8888,
+        secret  : 'LPjNP5H0#o1R(5}5r{8Iet5Bf8'
+    },
+    mongodb: {
+        port    : 27017,
+        host    : 'localhost',
+        database: 'test'
+    }
+};
 
 logger.setLevel('off');
 
 describe('BlogService', () => {
     let server;
+    let db;
     let service;
-    let validToken;
+    let validToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU4ZmJmY2ZiMzQxMmYxNzRkNWIwZDFjYSIsIm5hbWUiOiJ0ZXN0LXVzZXIiLCJlbWFpbCI6InRlc3RAdXNlci5kZSIsImlhdCI6MTQ5MjkwOTMwN30.BhcL3atRuQroLTYwR1kDQQo6Vh6ZnV-sY0QKgxhf9DI';
     let validBlogPostId;
     
-    before((done) => {
+    before(() => {
         const mockgoose = new Mockgoose(mongoose);
-        
-        validToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU4ZmJmY2ZiMzQxMmYxNzRkNWIwZDFjYSIsIm5hbWUiOiJ0ZXN0LXVzZXIiLCJlbWFpbCI6InRlc3RAdXNlci5kZSIsImlhdCI6MTQ5MjkwOTMwN30.BhcL3atRuQroLTYwR1kDQQo6Vh6ZnV-sY0QKgxhf9DI';
-        
-        mockgoose.prepareStorage().then(() => {
-            server  = new Server(config.server);
-            server.registerDb('mongo', new Database(config.mongodb));
+        return mockgoose.prepareStorage().then(() => {
+            server = new Server(config.express);
+            db     = new MongoClient(config.mongodb);
+            server.registerDb('mongo', db);
             service = new BlogService(server);
             server.registerService(service);
             server.start();
-            done();
         });
     });
     

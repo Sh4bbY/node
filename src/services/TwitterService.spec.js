@@ -2,31 +2,27 @@
 
 const assert    = require('assert');
 const logger    = require('log4js').getLogger('server');
-const mongoose  = require('mongoose');
-const chai      = require('chai');
-const chaiHttp  = require('chai-http');
-const Mockgoose = require('mockgoose').Mockgoose;
 
-chai.use(chaiHttp);
-
-const config         = require('../../config.json');
 const Server         = require('../Server');
-const Database       = require('../common/mongo/Database');
 const TwitterService = require('./TwitterService');
 
-logger.setLevel('off');
+const config = {
+    express      : {
+        protocol: 'http',
+        port    : 8888,
+        secret  : 'test-secret-1234567890'
+    }
+};
 
+logger.setLevel('off');
 
 describe('TwitterService', () => {
     let server;
     let service;
-    let validToken;
     
     before(() => {
-        const mockgoose = new Mockgoose(mongoose);
-        
         return mockgoose.prepareStorage().then(() => {
-            server  = new Server(config.server);
+            server  = new Server(config.express);
             service = new TwitterService(server);
             server.registerService(service);
             server.start();

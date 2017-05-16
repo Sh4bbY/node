@@ -46,11 +46,11 @@ echo "
 
 echo " --> install elasticsearch"
 rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
-echo "[elasticsearch-2.x]
+echo "[elastic-2.x]
 name=Elasticsearch repository for 2.x packages
-baseurl=https://packages.elastic.co/elasticsearch/2.x/centos
+baseurl=https://packages.elastic.co/elastic/2.x/centos
 gpgcheck=1
-gpgkey=https://packages.elastic.co/GPG-KEY-elasticsearch
+gpgkey=https://packages.elastic.co/GPG-KEY-elastic
 enabled=1" > /etc/yum.repos.d/elasticsearch.repo
 yum install elasticsearch
 systemctl enable elasticsearch

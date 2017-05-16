@@ -4,7 +4,7 @@ const assert    = require('assert');
 const logger    = require('log4js').getLogger('server');
 const mongoose  = require('mongoose');
 const Mockgoose = require('mockgoose').Mockgoose;
-const Database  = require('../Database');
+const Database  = require('../MongoClient');
 
 logger.setLevel('off');
 

@@ -1,14 +1,14 @@
 'use strict';
 
-const assert    = require('assert');
-const logger    = require('log4js').getLogger('server');
-const mongoose  = require('mongoose');
-const Mockgoose = require('mockgoose').Mockgoose;
-const Database  = require('./Database');
+const assert      = require('assert');
+const logger      = require('log4js').getLogger('server');
+const mongoose    = require('mongoose');
+const Mockgoose   = require('mockgoose').Mockgoose;
+const MongoClient = require('./MongoClient');
 
 logger.setLevel('off');
 
-describe('Database', () => {
+describe('MongoClient', () => {
     let db;
     before(() => {
         const mockgoose = new Mockgoose(mongoose);
@@ -19,7 +19,7 @@ describe('Database', () => {
                 'database': 'test'
             };
             
-            db = new Database(config);
+            db = new MongoClient(config);
         });
     });
     

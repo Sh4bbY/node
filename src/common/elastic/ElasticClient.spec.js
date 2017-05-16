@@ -2,11 +2,11 @@
 
 const assert   = require('assert');
 const logger   = require('log4js').getLogger('server');
-const Database = require('./Database');
+const ElasticClient = require('./ElasticClient');
 
 logger.setLevel('off');
 
-describe('ElasticSearch', () => {
+describe('ElasticClient', () => {
     let db;
     before(() => {
         const config = {
@@ -15,7 +15,7 @@ describe('ElasticSearch', () => {
             log : 'error'
         };
         
-        db = new Database(config);
+        db = new ElasticClient(config);
     });
     
     describe('ping', () => {

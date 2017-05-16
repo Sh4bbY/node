@@ -12,7 +12,7 @@ module.exports = class TwitterService {
     constructor(server) {
         this.server = server;
         this.router = server.router;
-        this.db     = server.db;
+        this.db     = server.db.elastic;
         
         this.router.get('/api/tweets/:type', handleTweetSearch.bind(this));
         this.router.get('/api/twitter/get', handleGet.bind(this));
@@ -88,7 +88,7 @@ function handleTweetSearch(req, res) {
     const type  = req.params.type;
     const query = req.query.search;
     
-    this.db.elasticSearch.search(index, type, query)
+    this.db.search(index, type, query)
         .then(result => {
             const hits   = result.hits.hits;
             const output = hits.map(hit => ({id: hit._source.id, text: hit._source.text}));

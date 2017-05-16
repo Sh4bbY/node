@@ -1,21 +1,26 @@
 'use strict';
 
-const assert    = require('assert');
-const logger    = require('log4js').getLogger('server');
-const mongoose  = require('mongoose');
-const chai      = require('chai');
-const chaiHttp  = require('chai-http');
-const Mockgoose = require('mockgoose').Mockgoose;
+const assert = require('assert');
+const logger = require('log4js').getLogger('server');
 
-chai.use(chaiHttp);
-
-const config         = require('../../config.json');
 const Server         = require('../Server');
-const Database       = require('../common/elasticsearch/Database');
+const ElasticClient  = require('../common/elastic/ElasticClient');
 const CryptoImporter = require('./CryptoImporter');
 
-logger.setLevel('debug');
+const config = {
+    express      : {
+        protocol: 'http',
+        port    : 8888,
+        secret  : 'test-secret-1234567890'
+    },
+    elasticsearch: {
+        port: 9200,
+        protocol: 'http',
+        log : 'error'
+    }
+};
 
+//logger.setLevel('debug');
 
 describe('CryptoImporter', () => {
     let server;
@@ -23,10 +28,10 @@ describe('CryptoImporter', () => {
     let db;
     
     before(() => {
-        server = new Server(config.server);
-        db     = new Database(config.elasticsearch);
-        server.registerDb('elasticSearch', db);
+        server   = new Server(config.express);
+        db       = new ElasticClient(config.elasticsearch);
         importer = new CryptoImporter(server);
+        server.registerDb('elastic', db);
         server.start()
     });
     
@@ -46,7 +51,7 @@ describe('CryptoImporter', () => {
     xdescribe('count', () => {
         it('should ...', function (done) {
             this.timeout(10000);
-            db.client.count({
+            db.count({
                 index: 'chart_data',
                 type : 'BTC_ETH'
             }).then(result => {
