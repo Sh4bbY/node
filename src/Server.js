@@ -7,6 +7,8 @@ const session     = require('express-session');
 const bearerToken = require('express-bearer-token');
 const logger      = require('log4js').getLogger('server');
 const Joi         = require('joi');
+const fs          = require('fs');
+const path        = require('path');
 
 const configSchema = Joi.object().keys({
     protocol     : Joi.string().valid('http', 'https').required(),
@@ -102,6 +104,14 @@ class Server {
         this.services.push(service);
     }
     
+    serveHtml(filePath) {
+        const absFilePath = path.resolve(filePath);
+        if (fs.existsSync(absFilePath)) {
+            this.serveFile = absFilePath;
+            this.servePath = absFilePath.substring(0, absFilePath.lastIndexOf('/'));
+        }
+    }
+    
     _registerMiddleware() {
         this.app.use(bearerToken());
         if (this.config.sessionSecret) {
@@ -117,6 +127,15 @@ class Server {
         
         this.app.use(this.router);
         
+        if (this.serveFile) {
+            this.app.get('*', (req, res) => {
+                const reqPath = path.join(this.servePath, req.path);
+                if (fs.existsSync(reqPath) && req.path !== '/') {
+                    return res.sendFile(reqPath);
+                }
+                return res.sendFile(this.serveFile);
+            });
+        }
         this.app.use(errorHandler);
     }
 }

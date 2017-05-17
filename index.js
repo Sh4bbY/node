@@ -42,5 +42,7 @@ server.registerService(todoService);
 server.registerService(twitterService);
 server.registerService(cryptoService);
 
+server.serveHtml('../angular2/dist/index.html');
+
 server.start();
 
