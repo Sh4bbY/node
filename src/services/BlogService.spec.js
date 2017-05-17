@@ -15,9 +15,9 @@ const BlogService = require('./BlogService');
 
 const config = {
     express: {
-        protocol: 'http',
-        port    : 8888,
-        secret  : 'LPjNP5H0#o1R(5}5r{8Iet5Bf8'
+        protocol : 'http',
+        port     : 8888,
+        jwtSecret: 'LPjNP5H0#o1R(5}5r{8Iet5Bf8'
     },
     mongodb: {
         port    : 27017,

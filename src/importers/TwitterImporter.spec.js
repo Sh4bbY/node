@@ -11,7 +11,7 @@ const config = {
     express      : {
         protocol: 'http',
         port    : 8888,
-        secret  : 'test-secret-1234567890'
+        jwtSecret  : 'test-secret-1234567890'
     },
     elasticsearch: {
         port: 9200,

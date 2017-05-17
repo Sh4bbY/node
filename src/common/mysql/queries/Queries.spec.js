@@ -7,7 +7,7 @@ const Queries     = require('./Queries');
 
 //logger.setLevel('off');
 
-describe('MysqlClient', () => {
+describe('Queries (Mysql)', () => {
     let client;
     let query;
     let userId;
@@ -27,43 +27,4 @@ describe('MysqlClient', () => {
     });
     
     
-    describe('createUser', () => {
-        it('should create a user', () => {
-            const user = {
-                UserName    : 'JohnDoe99',
-                FirstName   : 'John',
-                EmailAddress: 'JohnDoe99@dead.com'
-            };
-            return query.createUser(user).then((result) => {
-                assert.equal(result.affectedRows, 1);
-                assert.equal(result.warningCount, 0);
-                assert.equal(result.changedRows, 0);
-                userId = result.insertId;
-            });
-        });
-    });
-    
-    describe('getUserById', () => {
-        it('should return a user', () => {
-            return query.getUserById(userId).then((user) => {
-                assert.equal(user.ID, userId);
-            });
-        });
-    });
-    
-    describe('getUsers', () => {
-        it('should get some users', () => {
-            const options = {
-                limit : 1,
-                offset: 0,
-                order : {
-                    by       : 'UserName',
-                    direction: 'ASC'
-                }
-            };
-            return query.getUsers(options).then((results) => {
-                assert(results instanceof Array);
-            });
-        });
-    });
 });

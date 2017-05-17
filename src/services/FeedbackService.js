@@ -10,7 +10,7 @@ module.exports = class FeedbackService {
         this.router = server.router;
         this.db     = server.db.mongo;
         
-        const protectMiddleware = expressJwt({secret: this.server.config.secret});
+        const protectMiddleware = expressJwt({secret: this.server.config.jwtSecret});
         
         this.router.post('/api/feedback', handleCreateFeedback.bind(this));
         this.router.get('/api/feedback', protectMiddleware, handleGetFeedback.bind(this));
@@ -20,14 +20,14 @@ module.exports = class FeedbackService {
 };
 
 function handleGetFeedback(req, res) {
-    const requestSchema    = Joi.object().keys({
+    const requestSchema = Joi.object().keys({
         offset: Joi.number().min(0),
         limit : Joi.number().min(0)
     }).required().options({abortEarly: false});
-    const validationResult = Joi.validate(req.query, requestSchema);
+    const validation    = Joi.validate(req.query, requestSchema);
     
-    if (validationResult.error) {
-        validationResult.error.details.forEach(err => logger.error(err.message));
+    if (validation.error) {
+        validation.error.details.forEach(err => logger.error(err.message));
         return res.status(400).send('Invalid Parameters');
     }
     
@@ -39,10 +39,10 @@ function handleGetFeedback(req, res) {
 }
 
 function handleGetFeedbackById(req, res) {
-    const idSchema         = Joi.string().alphanum().length(24).required();
-    const validationResult = Joi.validate(req.params.id, idSchema);
+    const idSchema   = Joi.string().alphanum().length(24).required();
+    const validation = Joi.validate(req.params.id, idSchema);
     
-    if (validationResult.error) {
+    if (validation.error) {
         return res.status(400).send('Invalid Parameters');
     }
     
@@ -61,10 +61,10 @@ function handleCreateFeedback(req, res) {
         message: Joi.string().min(20).required()
     }).required().options({abortEarly: false});
     
-    const validationResult = Joi.validate(req.body, requestSchema);
+    const validation = Joi.validate(req.body, requestSchema);
     
-    if (validationResult.error) {
-        validationResult.error.details.forEach(err => logger.error(err.message));
+    if (validation.error) {
+        validation.error.details.forEach(err => logger.error(err.message));
         return res.status(400).send('Invalid Parameters');
     }
     
@@ -73,10 +73,10 @@ function handleCreateFeedback(req, res) {
         .then((blogPost) => res.json(blogPost));
 }
 function handleDeleteFeedback(req, res) {
-    const idSchema         = Joi.string().alphanum().length(24).required();
-    const validationResult = Joi.validate(req.params.id, idSchema);
+    const idSchema   = Joi.string().alphanum().length(24).required();
+    const validation = Joi.validate(req.params.id, idSchema);
     
-    if (validationResult.error) {
+    if (validation.error) {
         return res.status(400).send('Invalid Parameters');
     }
     

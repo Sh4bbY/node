@@ -28,9 +28,9 @@ logger.setLevel('off');
 describe('Server', () => {
     
     const config = {
-        port    : 8888,
-        protocol: 'http',
-        secret  : 'myTestSecret234234132123123'
+        port         : 8888,
+        protocol     : 'http',
+        jwtSecret    : 'myTestSecret234234132123123'
     };
     
     before(() => {

@@ -17,27 +17,27 @@ module.exports = class AuthService {
         this.router.post('/api/loginByToken', handleLoginByToken.bind(this));
         this.router.post('/api/registration', handleRegistration.bind(this));
         this.router.get('/api/logout',
-            expressJwt({secret: server.config.secret, isRevoked: isRevokedCallback.bind(this)}),
+            expressJwt({secret: server.config.jwtSecret, isRevoked: isRevokedCallback.bind(this)}),
             handleLogout.bind(this));
     }
     
     createTokenResponse(payload) {
         return {
-            token: jwt.sign(payload, this.server.config.secret, {expiresIn: '7d'})
+            token: jwt.sign(payload, this.server.config.jwtSecret, {expiresIn: '7d'})
         };
     }
 };
 
 function handleLogin(req, res) {
-    const requestSchema = Joi.object().keys({
+    const schema = Joi.object().keys({
         name    : Joi.string().required(),
         password: Joi.string().required()
     }).required();
     
-    const validationResult = Joi.validate(req.body, requestSchema);
+    const validation = Joi.validate(req.body, schema);
     
-    if (!!validationResult.error) {
-        validationResult.error.details.forEach(err => logger.error(err.message));
+    if (validation.error) {
+        validation.error.details.forEach(err => logger.error(err.message));
         return res.status(400).send('invalid parameters');
     }
     
@@ -68,7 +68,7 @@ function handleLogin(req, res) {
 
 function handleLoginByToken(req, res) {
     try {
-        jwt.verify(req.body.token, this.server.config.secret);
+        jwt.verify(req.body.token, this.server.config.jwtSecret);
         return res.json({token: req.body.token});
     } catch (err) {
         logger.error('Invalid Token: ', err.message);
@@ -77,7 +77,7 @@ function handleLoginByToken(req, res) {
 }
 
 function handleLogout(req, res) {
-    const payload = jwt.decode(req.token, this.server.config.secret);
+    const payload = jwt.decode(req.token, this.server.config.jwtSecret);
     
     removeExpiredTokens.call(this)
         .then(this.db.query.revoked.add({token: req.token, exp: payload.exp}))
@@ -87,17 +87,17 @@ function handleLogout(req, res) {
 }
 
 function handleRegistration(req, res) {
-    const requestSchema = Joi.object().keys({
-        name          : Joi.string().min(3).max(15).required(),
-        email         : Joi.string().email().required(),
-        password      : Joi.string().min(6).required(),
+    const schema = Joi.object().keys({
+        name            : Joi.string().min(3).max(15).required(),
+        email           : Joi.string().email().required(),
+        password        : Joi.string().min(6).required(),
         password_confirm: Joi.string().min(6).required()
     }).required().options({abortEarly: false});
     
-    const validationResult = Joi.validate(req.body, requestSchema);
+    const validation = Joi.validate(req.body, schema);
     
-    if (!!validationResult.error) {
-        validationResult.error.details.forEach(err => logger.error(err.message));
+    if (validation.error) {
+        validation.error.details.forEach(err => logger.error(err.message));
         return res.status(400).send('invalid parameters')
     }
     if (req.body.password !== req.body.password_confirm) {

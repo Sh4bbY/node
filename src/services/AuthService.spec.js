@@ -15,9 +15,9 @@ const AuthService = require('./AuthService');
 
 const config = {
     express: {
-        protocol: 'http',
-        port    : 8888,
-        secret  : 'LPjNP5H0#o1R(5}5r{8Iet5Bf8'
+        protocol : 'http',
+        port     : 8888,
+        jwtSecret: 'LPjNP5H0#o1R(5}5r{8Iet5Bf8'
     },
     mongodb: {
         port    : 27017,
@@ -37,7 +37,7 @@ const validUser = {
 describe('AuthService', () => {
     let server;
     let service;
-    let validToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU4Zjk0NjY3ODdmOTAzNmZkZjQxM2YyZCIsIm5hbWUiOiJzaGFiYnkiLCJlbWFpbCI6ImFzZEBhc2QuZGUiLCJpYXQiOjE0OTI5MDIwOTJ9.J-OO_LX1NplMfKn4yyY17f796smBVVGSLuYOtntug8s';
+    let token;
     let db;
     
     before(() => {
@@ -163,6 +163,7 @@ describe('AuthService', () => {
                 .post('/api/login')
                 .send(body)
                 .end((err, res) => {
+                    token = res.body.token;
                     assert.equal(res.status, 200);
                     done();
                 });
@@ -182,7 +183,7 @@ describe('AuthService', () => {
         });
         
         it('should return status 200 if an valid token was sent', (done) => {
-            const body = {token: validToken};
+            const body = {token: token};
             chai.request(server.app)
                 .post('/api/loginByToken')
                 .send(body)
@@ -197,7 +198,7 @@ describe('AuthService', () => {
         it('should return status 200 if the request was valid', (done) => {
             chai.request(server.app)
                 .get('/api/logout')
-                .set('Authorization', 'Bearer ' + validToken)
+                .set('Authorization', 'Bearer ' + token)
                 .end((err, res) => {
                     assert.equal(res.status, 200);
                     done();

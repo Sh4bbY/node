@@ -12,7 +12,7 @@ module.exports = class BlogService {
         this.router = server.router;
         this.db     = server.db.mongo;
         
-        const protectMiddleware = expressJwt({secret: this.server.config.secret});
+        const protectMiddleware = expressJwt({secret: this.server.config.jwtSecret});
         
         this.router.get('/api/blog/posts', handleFetchBlogPosts.bind(this));
         this.router.get('/api/blog/post/:id', handleFetchBlogPost.bind(this));
@@ -23,14 +23,14 @@ module.exports = class BlogService {
 };
 
 function handleFetchBlogPosts(req, res) {
-    const requestSchema    = Joi.object().keys({
+    const requestSchema = Joi.object().keys({
         offset: Joi.number().min(0),
         limit : Joi.number().min(0)
     }).required().options({abortEarly: false});
-    const validationResult = Joi.validate(req.query, requestSchema);
+    const validation    = Joi.validate(req.query, requestSchema);
     
-    if (validationResult.error) {
-        validationResult.error.details.forEach(err => logger.error(err.message));
+    if (validation.error) {
+        validation.error.details.forEach(err => logger.error(err.message));
         return res.status(400).send('Invalid Parameters');
     }
     
@@ -45,10 +45,10 @@ function handleFetchBlogPosts(req, res) {
 }
 
 function handleFetchBlogPost(req, res) {
-    const idSchema         = Joi.string().alphanum().length(24).required();
-    const validationResult = Joi.validate(req.params.id, idSchema);
+    const idSchema   = Joi.string().alphanum().length(24).required();
+    const validation = Joi.validate(req.params.id, idSchema);
     
-    if (validationResult.error) {
+    if (validation.error) {
         return res.status(400).send('Invalid Parameters');
     }
     
@@ -72,10 +72,10 @@ function handleCreateBlogPost(req, res) {
         body  : Joi.string().min(20).required()
     }).required().options({abortEarly: false});
     
-    const validationResult = Joi.validate(req.body, requestSchema);
+    const validation = Joi.validate(req.body, requestSchema);
     
-    if (validationResult.error) {
-        validationResult.error.details.forEach(err => logger.error(err.message));
+    if (validation.error) {
+        validation.error.details.forEach(err => logger.error(err.message));
         return res.status(400).send('Invalid Parameters');
     }
     
@@ -87,21 +87,22 @@ function handleCreateBlogPost(req, res) {
 }
 
 function handleUpdateBlogPost(req, res) {
-    const idSchema      = Joi.string().alphanum().length(24).required();
-    const requestSchema = Joi.object().keys({
-        author: Joi.object().keys({
-            id   : Joi.string(),
-            name : Joi.string(),
-            email: Joi.string().email()
-        }),
-        title : Joi.string().min(10).max(300),
-        body  : Joi.string().min(20)
+    const schema = Joi.object().keys({
+        id  : Joi.string().alphanum().length(24).required(),
+        body: Joi.object().keys({
+            author: Joi.object().keys({
+                id   : Joi.string(),
+                name : Joi.string(),
+                email: Joi.string().email()
+            }),
+            title : Joi.string().min(10).max(300),
+            body  : Joi.string().min(20)
+        })
     }).required().options({abortEarly: false});
     
-    const idValidationResult   = Joi.validate(req.params.id, idSchema);
-    const bodyValidationResult = Joi.validate(req.body, requestSchema);
+    const validation = Joi.validate({id: req.params.id, body: req.body}, schema);
     
-    if (idValidationResult.error || bodyValidationResult.error) {
+    if (validation.error) {
         return res.status(400).send('Invalid Parameters');
     }
     
@@ -113,10 +114,10 @@ function handleUpdateBlogPost(req, res) {
 }
 
 function handleDeleteBlogPost(req, res) {
-    const idSchema         = Joi.string().alphanum().length(24).required();
-    const validationResult = Joi.validate(req.params.id, idSchema);
+    const idSchema   = Joi.string().alphanum().length(24).required();
+    const validation = Joi.validate(req.params.id, idSchema);
     
-    if (validationResult.error) {
+    if (validation.error) {
         return res.status(400).send('Invalid Parameters');
     }
     

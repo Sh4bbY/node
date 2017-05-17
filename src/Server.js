@@ -9,17 +9,18 @@ const logger      = require('log4js').getLogger('server');
 const Joi         = require('joi');
 
 const configSchema = Joi.object().keys({
-    protocol: Joi.string().valid('http', 'https').required(),
-    port    : Joi.number().min(1).max(99999).required(),
-    secret  : Joi.string().min(20).max(40).required()
+    protocol     : Joi.string().valid('http', 'https').required(),
+    port         : Joi.number().min(1).max(9999).required(),
+    jwtSecret    : Joi.string().min(20).max(40).required(),
+    sessionSecret: Joi.string().min(20).max(40)
 }).required().options({abortEarly: false});
 
 class Server {
     constructor(config) {
-        const validationResult = Joi.validate(config, configSchema);
-        if (!!validationResult.error) {
-            validationResult.error.details.forEach(err => logger.error(err.message));
-            throw new Error('Invalid Configuration', validationResult.error);
+        const validation = Joi.validate(config, configSchema);
+        if (validation.error) {
+            validation.error.details.forEach(err => logger.error(err.message));
+            throw new Error('Invalid Configuration', validation.error);
         }
         this.config       = config;
         this.app          = express();
@@ -103,11 +104,13 @@ class Server {
     
     _registerMiddleware() {
         this.app.use(bearerToken());
-        this.app.use(session({
-            secret: 'very secret',
-            resave: false,
-            saveUninitialized: true
-        }));                                    // use gzip compression for the response body
+        if (this.config.sessionSecret) {
+            this.app.use(session({
+                secret           : this.config.sessionSecret,
+                resave           : false,
+                saveUninitialized: true
+            }));
+        }
         this.app.use(compression());                                    // use gzip compression for the response body
         this.app.use(bodyParser.urlencoded({extended: false}));         // parse application/x-www-form-urlencoded
         this.app.use(bodyParser.json());                                // parse application/json
