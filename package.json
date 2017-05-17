@@ -22,11 +22,11 @@
     "chai": "3.5.0",
     "chai-http": "3.0.0",
     "jshint": "2.9.4",
-    "mocha": "3.2.0",
+    "mocha": "^3.4.1",
     "mockgoose": "7.3.1",
     "nodemon": "1.11.0",
-    "nyc": "10.2.0",
-    "sinon": "2.1.0"
+    "nyc": "^10.3.2",
+    "sinon": "^2.2.0"
   },
   "dependencies": {
     "agentkeepalive": "^3.1.0",
@@ -35,18 +35,18 @@
     "body-parser": "1.17.1",
     "compression": "1.6.2",
     "elasticsearch": "^13.0.1",
-    "express": "4.15.2",
+    "express": "^4.15.3",
     "express-bearer-token": "2.1.0",
-    "express-jwt": "5.1.0",
+    "express-jwt": "^5.3.0",
     "express-session": "^1.15.2",
-    "joi": "10.4.1",
-    "jsonwebtoken": "7.3.0",
+    "joi": "^10.4.2",
+    "jsonwebtoken": "^7.4.1",
     "log4js": "1.1.1",
     "marked": "0.3.6",
-    "mongoose": "4.9.4",
+    "mongoose": "^4.9.9",
     "mysql": "^2.13.0",
     "oauth": "^0.9.15",
-    "socket.io": "1.7.3"
+    "socket.io": "^2.0.1"
   },
   "nyc": {
     "all": true,
