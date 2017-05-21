@@ -19,4 +19,4 @@ coverage/
 secrets.json
 
 # backup of sql schema
-appschema.mwb.bak
+app-schema.mwb.bak

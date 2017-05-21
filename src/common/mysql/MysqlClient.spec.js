@@ -6,7 +6,7 @@ const MysqlClient = require('./MysqlClient');
 
 logger.setLevel('off');
 
-xdescribe('MysqlClient', () => {
+describe('MysqlClient', () => {
     let db;
     const config = {
         port    : 3306,
