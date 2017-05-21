@@ -30,6 +30,28 @@ module.exports = class UserQueries {
         return this.client.query(query, user);
     }
     
+    updateUser(id, user) {
+        const schema = Joi.object().keys({
+            id  : Joi.number().required(),
+            user: Joi.object().keys({
+                UserName    : Joi.string().min(4).max(45).required(),
+                EmailAddress: Joi.string().email().min(5).max(60).required(),
+                FirstName   : Joi.string().min(2).max(45),
+                LastName    : Joi.string().min(2).max(45)
+            })
+        }).required();
+        
+        const validation = Joi.validate({id, user}, schema);
+        
+        if (validation.error) {
+            validation.error.details.forEach(err => logger.error(err.message));
+            return Promise.reject(validation.error);
+        }
+        
+        const query = 'UPDATE `Users` SET ? WHERE ID = ?';
+        return this.client.query(query, [user, id]);
+    }
+    
     registerUser(user, password) {
         const credentials = {
             Password: password,
@@ -54,8 +76,7 @@ module.exports = class UserQueries {
     }
     
     removeAllUsers() {
-        const query = 'DELETE FROM `Users`';
-        return this.client.query(query);
+        return this.client.query('DELETE FROM `Users`');
     }
 };
 

@@ -32,6 +32,10 @@ module.exports = class MongoClient {
             revoked : new Queries(this.model.RevokedToken),
             tweet   : new Queries(this.model.Tweet)
         };
+    
+        mongoose.connection.on('error', err => {
+            logger.error('mongodb connect error:', err);
+        });
     }
     
     connect() {

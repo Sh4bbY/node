@@ -17,3 +17,6 @@ coverage/
 
 # private configurations
 secrets.json
+
+# backup of sql schema
+appschema.mwb.bak

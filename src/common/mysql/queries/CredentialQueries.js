@@ -4,7 +4,6 @@ const mysql   = require('mysql');
 const Joi     = require('joi');
 const bcrypt  = require('bcrypt');
 const logger  = require('log4js').getLogger('server');
-const Queries = require('./Queries');
 
 const SALT_ROUNDS = 10;
 

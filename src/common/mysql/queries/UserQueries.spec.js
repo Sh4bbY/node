@@ -44,26 +44,27 @@ describe('UserQueries (Mysql)', () => {
         });
     });
     
-    describe('getUserById', () => {
-        it('should return a user', () => {
-            return query.getUserById(userId).then((user) => {
-                assert.equal(user.ID, userId);
+    describe('updateUser', () => {
+        it('should update user information', () => {
+            const user = {
+                UserName    : 'JohnDoeNew',
+                FirstName   : 'JohnNew',
+                LastName    : 'DoeNew',
+                EmailAddress: 'JohnDoe@newlocalhost.com'
+            };
+            return query.updateUser(userId, user).then((result) => {
+                console.log(result);
+                assert.equal(result.affectedRows, 1);
+                assert.equal(result.warningCount, 0);
+                assert.equal(result.changedRows, 1);
             });
         });
     });
     
-    describe('getUsers', () => {
-        it('should get some users', () => {
-            const options = {
-                limit : 1,
-                offset: 0,
-                order : {
-                    by       : 'UserName',
-                    direction: 'ASC'
-                }
-            };
-            return query.getUsers(options).then((results) => {
-                assert(results instanceof Array);
+    describe('getUserById', () => {
+        it('should return a user', () => {
+            return query.getUserById(userId).then((user) => {
+                assert.equal(user.ID, userId);
             });
         });
     });
@@ -80,6 +81,22 @@ describe('UserQueries (Mysql)', () => {
                 assert.equal(result.warningCount, 0);
                 assert.equal(result.changedRows, 0);
                 assert((typeof result.insertId) === 'number' && result.insertId > 0);
+            });
+        });
+    });
+    
+    describe('getUsers', () => {
+        it('should get some users', () => {
+            const options = {
+                limit : 1,
+                offset: 0,
+                order : {
+                    by       : 'UserName',
+                    direction: 'ASC'
+                }
+            };
+            return query.getUsers(options).then((results) => {
+                assert(results instanceof Array);
             });
         });
     });
