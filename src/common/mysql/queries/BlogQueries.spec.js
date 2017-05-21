@@ -8,7 +8,7 @@ const BlogQueries = require('./BlogQueries');
 
 //logger.setLevel('off');
 
-describe('BlogQueries (Mysql)', () => {
+xdescribe('BlogQueries (Mysql)', () => {
     let client;
     let blogQuery, userQuery;
     let userId, postId, tagId;

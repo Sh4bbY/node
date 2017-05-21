@@ -12,10 +12,15 @@ const TodoService     = require('./src/services/TodoService');
 const TwitterService  = require('./src/services/TwitterService');
 const CryptoService   = require('./src/services/CryptoService');
 const config          = require('./config.json');
-const secrets         = require('./secrets.json');
 
-/** assign secrets to config */
-Object.keys(config).forEach(key => Object.assign(config[key], secrets[key]));
+try {
+    const secrets = require('./secrets.json');
+    /** assign secrets to config */
+    Object.keys(config).forEach(key => Object.assign(config[key], secrets[key]));
+}catch(err) {
+    console.log('no secrets.json in place');
+}
+
 
 const server  = new Server(config.express);
 const mysql   = new MysqlClient(config.mysql);

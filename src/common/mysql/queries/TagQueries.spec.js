@@ -9,7 +9,7 @@ const TagQueries  = require('./TagQueries');
 
 //logger.setLevel('off');
 
-describe('TagQueries (Mysql)', () => {
+xdescribe('TagQueries (Mysql)', () => {
     let client;
     let blogQuery, userQuery, tagQuery;
     let userId, postId, tagId;

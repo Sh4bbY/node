@@ -9,7 +9,7 @@ const CommentQueries = require('./CommentQueries');
 
 //logger.setLevel('off');
 
-describe('BlogQueries (Mysql)', () => {
+xdescribe('BlogQueries (Mysql)', () => {
     let client;
     let blogQuery, userQuery, commentQuery;
     let userId, postId, commentId, tagId;

@@ -111,7 +111,7 @@ describe('AuthService', () => {
                 .post('/api/registration')
                 .send(body)
                 .end((err, res) => {
-                    assert.equal(res.status, 400);
+                    assert.equal(res.status, 406);
                     done();
                 });
         });

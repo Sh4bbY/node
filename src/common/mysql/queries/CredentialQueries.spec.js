@@ -8,7 +8,7 @@ const UserQueries       = require('./UserQueries');
 
 //logger.setLevel('off');
 
-describe('CredentialQueries (Mysql)', () => {
+xdescribe('CredentialQueries (Mysql)', () => {
     let client;
     let query;
     let userQuery;

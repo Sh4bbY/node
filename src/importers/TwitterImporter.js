@@ -6,8 +6,6 @@ const expressJwt = require('express-jwt');
 const jwt        = require('jsonwebtoken');
 const logger     = require('log4js').getLogger('server');
 const oauth      = require('oauth');
-const secrets    = require('../../secrets.json')
-
 
 const requestUrl      = 'https://twitter.com/oauth/request_token';
 const accessUrl       = 'https://twitter.com/oauth/access_token';
@@ -16,12 +14,12 @@ const signatureMethod = 'HMAC-SHA1';
 const version         = '1.0A';
 
 module.exports = class TwitterImporter {
-    constructor(server) {
+    constructor(server, secrets) {
         this.server   = server;
         this.router   = server.router;
         this.db       = server.db.elastic;
         this.consumer = new oauth.OAuth(requestUrl, accessUrl,
-            secrets.twitter.consumerKey, secrets.twitter.consumerSecret, version, callbackUrl, signatureMethod);
+            secrets.consumerKey, secrets.consumerSecret, version, callbackUrl, signatureMethod);
     }
     
     importTweets() {

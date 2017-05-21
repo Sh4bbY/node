@@ -7,7 +7,7 @@ const UserQueries = require('./UserQueries');
 
 //logger.setLevel('off');
 
-describe('UserQueries (Mysql)', () => {
+xdescribe('UserQueries (Mysql)', () => {
     let client;
     let query;
     let userId;

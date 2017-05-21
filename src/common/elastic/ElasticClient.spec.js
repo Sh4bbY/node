@@ -18,7 +18,7 @@ describe('ElasticClient', () => {
         db = new ElasticClient(config);
     });
     
-    describe('ping', () => {
+    xdescribe('ping', () => {
         it('should ping elasticSearch', (done) => {
             db.ping().then(res => done());
         });

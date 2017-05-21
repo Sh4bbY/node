@@ -9,14 +9,18 @@ const TwitterImporter = require('./TwitterImporter');
 
 const config = {
     express      : {
-        protocol: 'http',
-        port    : 8888,
-        jwtSecret  : 'test-secret-1234567890'
+        protocol : 'http',
+        port     : 8888,
+        jwtSecret: 'test-secret-1234567890'
     },
     elasticsearch: {
         port: 9200,
         host: 'localhost',
         log : 'error'
+    },
+    twitter      : {
+        consumerKey   : 'asdasdasdasdasdsad',
+        consumerSecret: 'asdasdasdasdasdsad'
     }
 };
 
@@ -30,7 +34,7 @@ describe('TwitterService', () => {
     before(() => {
         server   = new Server(config.express);
         db       = new ElasticClient(config.elasticsearch);
-        importer = new TwitterImporter(server);
+        importer = new TwitterImporter(server, config.twitter);
         server.registerDb('elastic', db);
         server.registerService(importer);
         server.start();
