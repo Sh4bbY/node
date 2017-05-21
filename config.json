@@ -5,7 +5,7 @@
   },
   "mongodb"      : {
     "port"    : 27017,
-    "host"    : "localhost",
+    "host"    : "mongo",
     "database": "test"
   },
   "elasticsearch": {
@@ -15,7 +15,7 @@
   },
   "mysql"        : {
     "port"    : 3306,
-    "host"    : "localhost",
-    "database": "test"
+    "host"    : "mysql",
+    "database": "mydb"
   }
 }

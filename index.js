@@ -17,14 +17,14 @@ const secrets         = require('./secrets.json');
 /** assign secrets to config */
 Object.keys(config).forEach(key => Object.assign(config[key], secrets[key]));
 
+const server  = new Server(config.express);
+const mysql   = new MysqlClient(config.mysql);
 const mongo   = new MongoClient(config.mongodb);
 const elastic = new ElasticClient(config.elasticsearch);
-const mysql   = new MysqlClient(config.mysql);
-const server  = new Server(config.express);
 
+server.registerDb('mysql', mysql);
 server.registerDb('mongo', mongo);
 server.registerDb('elastic', elastic);
-server.registerDb('mysql', mysql);
 
 const authService     = new AuthService(server);
 const blogService     = new BlogService(server);
@@ -42,7 +42,7 @@ server.registerService(todoService);
 server.registerService(twitterService);
 server.registerService(cryptoService);
 
-server.serveHtml('../angular2/dist/index.html');
+//server.serveHtml('../angular2/dist/index.html');
 
 server.start();
 
