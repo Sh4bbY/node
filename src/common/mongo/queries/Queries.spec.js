@@ -25,12 +25,12 @@ describe('Queries', () => {
                 'database': 'test'
             };
             
-            db = new Database(config);
-            db.connect();
-            
+            db    = new Database(config);
             query = new DefaultQueries(db.query.revoked.model);
             item  = {token: 'AToken'};
             item2 = {token: 'BToken'};
+            
+            return db.connect();
         });
     });
     

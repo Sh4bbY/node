@@ -23,13 +23,13 @@ try {
 
 
 const server  = new Server(config.express);
-const mysql   = new MysqlClient(config.mysql);
+//const mysql   = new MysqlClient(config.mysql);
 const mongo   = new MongoClient(config.mongodb);
-const elastic = new ElasticClient(config.elasticsearch);
+//const elastic = new ElasticClient(config.elasticsearch);
 
-server.registerDb('mysql', mysql);
+//server.registerDb('mysql', mysql);
 server.registerDb('mongo', mongo);
-server.registerDb('elastic', elastic);
+//server.registerDb('elastic', elastic);
 
 const authService     = new AuthService(server);
 const blogService     = new BlogService(server);

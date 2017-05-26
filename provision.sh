@@ -8,7 +8,6 @@ USER=vagrant
 DESKTOP=true
 VBOX_VERSION=5.1.18
 
-# ---------------------- dev-env
 
 echo "
 ================> Environment Setup"
@@ -20,9 +19,19 @@ yum update
 echo " --> install Group 'development tools'"
 yum groupinstall -q -y 'Development Tools'
 
+echo " --> install vim"
+yum install -q -y vim
+
 echo " --> install NVM"
 HOME="/home/$USER"
 curl -s -o- https://raw.githubusercontent.com/creationix/nvm/v0.32.1/install.sh | bash
+
+echo " --> install docker"
+yum install -q -y yum-utils device-mapper-persistent-data lvm2
+yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+yum makecache fast
+yum install -q -y docker-ce
+curl -L https://github.com/docker/compose/releases/download/1.13.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
 
 echo " --> disable firewall"
 systemctl disable firewalld
@@ -38,7 +47,7 @@ GIT_PROMPT_ONLY_IN_REPO=1
   source ~/.bash-git-prompt/gitprompt.sh
 " >> /home/$USER/.bashrc
 
-echo "-- > set owner rights"
+echo " --> set owner rights"
 chown -R $USER:$USER /home/$USER
 
 echo "
@@ -83,6 +92,7 @@ if [ $DESKTOP ]
     systemctl set-default graphical.target
 
     echo " --> install Terminator"
+    yum -q -y epel-release
     yum -q -y install terminator
 
     echo " --> install Firefox"

@@ -1,9 +1,14 @@
+sudo: required
+
 language: node_js
+
 services:
+#  - docker
   - mysql
-  - elasticsearch
+
 node_js:
   - "6.10.2"
+
 addons:
   apt:
     sources:
@@ -13,5 +18,7 @@ addons:
     - g++-4.8
 env:
   - TRAVIS=travis CXX=g++-4.8
+
 before_install:
-  - mysql -u root < ./docker/app-schema.sql
+  - mysql -u root < ./shabbtech-schema.sql
+  - mysqladmin -u root password 'root-secret-pw'

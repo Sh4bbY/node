@@ -23,7 +23,7 @@ describe('TodoQueries', () => {
             };
             
             db = new Database(config);
-            db.connect();
+            return db.connect();
         });
     });
     

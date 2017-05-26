@@ -13,8 +13,12 @@ describe('MysqlClient', () => {
         host    : 'localhost',
         database: 'mydb',
         user    : 'root',
-        password: ''
+        password: 'root-secret-pw'
     };
+    
+    before(() => {
+        db = new MysqlClient(config);
+    });
     
     describe('connect', () => {
         it('should fail to connect to mysql server with invalid credentials', () => {

@@ -1,6 +1,6 @@
 'use strict';
 
-const Queries = require('./Queries');;
+const Queries = require('./Queries');
 
 module.exports = class BlogQueries extends Queries {
     add(blogPostData) {

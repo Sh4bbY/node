@@ -11,7 +11,7 @@ const BlogQueries = require('./BlogQueries');
 describe('BlogQueries (Mysql)', () => {
     let client;
     let blogQuery, userQuery;
-    let userId, postId, tagId;
+    let userId, postId;
     
     before(() => {
         const config = {
@@ -19,23 +19,26 @@ describe('BlogQueries (Mysql)', () => {
             host    : 'localhost',
             database: 'mydb',
             user    : 'root',
-            password: ''
+            password: 'root-secret-pw'
         };
         const user   = {
             UserName    : 'BlogJohnny',
             FirstName   : 'John',
             LastName    : 'Doe',
-            EmailAddress: 'JohnDoe@localhost.com'
+            EmailAddress: 'BlogJohnny@test.com'
         };
+        const password = 'mySecretPassword';
         
         client    = new MysqlClient(config);
         blogQuery = new BlogQueries(client);
         userQuery = new UserQueries(client);
-        return blogQuery.removeAllTags()
-            .then(() => blogQuery.removeAllPosts())
-            .then(() => userQuery.removeAllUsers())
-            .then(() => userQuery.createUser(user))
+        return client.query('DELETE FROM `Posts`')
+            .then(() => userQuery.createUser(user, password))
             .then(result => userId = result.insertId);
+    });
+    
+    after(() => {
+        return userQuery.removeUser(userId)
     });
     
     describe('createPost', () => {
@@ -61,14 +64,13 @@ describe('BlogQueries (Mysql)', () => {
                 Title  : 'Unit test for updating a blog post is working',
                 Content: 'Lorem ipsum dolor sit amed!!!!'
             };
-            const tags = [tagId];
-            return blogQuery.updatePost(postId, post, tags).then(result => {
+            return blogQuery.updatePost(postId, post).then(result => {
                 assert.equal(result.affectedRows, 1);
                 assert.equal(result.warningCount, 0);
                 assert.equal(result.changedRows, 1);
             });
         });
-    
+        
         it('should publish a blog post', () => {
             const post = {
                 Status: 'PUBLISHED'

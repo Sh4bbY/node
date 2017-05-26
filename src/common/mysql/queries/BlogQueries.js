@@ -27,7 +27,7 @@ module.exports = class BlogQueries {
         return this.client.query(query, post);
     }
     
-    updatePost(postId, post, tags) {
+    updatePost(postId, post) {
         const schema = Joi.object().keys({
             postId: Joi.number().required(),
             post  : Joi.object().keys({
@@ -36,25 +36,16 @@ module.exports = class BlogQueries {
                 Status       : Joi.string(),
                 RelatedUserID: Joi.number()
             }).required(),
-            tags  : Joi.array().items(Joi.number())
         }).required();
         
-        const validation = Joi.validate({postId, post, tags}, schema);
+        const validation = Joi.validate({postId, post}, schema);
         
         if (validation.error) {
             validation.error.details.forEach(err => logger.error(err.message));
             return Promise.reject(validation.error);
         }
         
-        if (tags && tags.length > 0) {
-            tags.forEach(tagId => this.linkTag(postId, tagId));
-        }
-        
         const query = 'UPDATE `Posts` SET ? WHERE ID = ?';
         return this.client.query(query, [post, postId]);
-    }
-    
-    removeAllPosts() {
-        return this.client.query('DELETE FROM `Posts`');
     }
 };

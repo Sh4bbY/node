@@ -26,12 +26,12 @@ describe('BlogQueries', () => {
         return mockgoose.prepareStorage().then(() => {
             const config = {
                 'port'    : 27017,
-                'host'    : 'localhost',
+                'host'    : 'mongo',
                 'database': 'test'
             };
             
             db = new Database(config);
-            db.connect();
+            return db.connect();
         });
     });
     

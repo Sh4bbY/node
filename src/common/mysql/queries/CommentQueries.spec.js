@@ -9,10 +9,10 @@ const CommentQueries = require('./CommentQueries');
 
 //logger.setLevel('off');
 
-xdescribe('BlogQueries (Mysql)', () => {
+describe('CommentQueries (Mysql)', () => {
     let client;
     let blogQuery, userQuery, commentQuery;
-    let userId, postId, commentId, tagId;
+    let userId, postId, commentId;
     
     before(() => {
         const config = {
@@ -20,25 +20,29 @@ xdescribe('BlogQueries (Mysql)', () => {
             host    : 'localhost',
             database: 'mydb',
             user    : 'root',
-            password: ''
+            password: 'root-secret-pw'
         };
         const user   = {
-            UserName    : 'BlogJohnny',
+            UserName    : 'CommentJohnny',
             FirstName   : 'John',
             LastName    : 'Doe',
-            EmailAddress: 'JohnDoe@localhost.com'
+            EmailAddress: 'CommentJohnny@test.com'
         };
+        const password = 'mySecretPassword';
         
         client       = new MysqlClient(config);
         blogQuery    = new BlogQueries(client);
         userQuery    = new UserQueries(client);
         commentQuery = new CommentQueries(client);
-        return blogQuery.removeAllTags()
-            .then(() => blogQuery.removeAllPosts())
-            .then(() => userQuery.removeAllUsers())
-            .then(() => userQuery.createUser(user))
+        return client.query('DELETE FROM `Posts`')
+            .then(() => userQuery.createUser(user, password))
             .then(result => userId = result.insertId);
     });
+    
+    after(() => {
+        return userQuery.removeUser(userId);
+    });
+    
     
     describe('createPost', () => {
         it('should create a blog post', () => {
@@ -57,22 +61,6 @@ xdescribe('BlogQueries (Mysql)', () => {
         });
     });
     
-    
-    describe('createTag', () => {
-        it('should create a tag', () => {
-            return blogQuery.getOrCreateTag('UnitTest').then(resultId => {
-                assert((typeof resultId) === 'number' && resultId > 0);
-                tagId = resultId;
-            });
-        });
-        
-        it('should get the former created tag', () => {
-            return blogQuery.getOrCreateTag('UnitTest').then(resultId => {
-                assert.equal(resultId, tagId);
-            });
-        });
-    });
-    
     describe('createComment', () => {
         it('should create a comment to a blog post', () => {
             const comment = {
@@ -80,7 +68,7 @@ xdescribe('BlogQueries (Mysql)', () => {
                 RelatedUserID: userId,
                 RelatedPostID: postId
             };
-            return blogQuery.createComment(comment).then(result => {
+            return commentQuery.createComment(comment).then(result => {
                 assert.equal(result.affectedRows, 1);
                 assert.equal(result.warningCount, 0);
                 assert.equal(result.changedRows, 0);

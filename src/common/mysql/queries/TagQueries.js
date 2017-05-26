@@ -42,7 +42,7 @@ module.exports = class TagQueries {
             return Promise.reject(validation.error);
         }
         
-        return this.client.query('INSERT INTO `Posts_has_Tags` SET ?', relation)
+        return this.client.query('INSERT INTO `Posts_has_Tags` SET ?', relation);
     }
     
     removeTag(tagId) {
@@ -53,10 +53,6 @@ module.exports = class TagQueries {
             return Promise.reject(validation.error);
         }
         
-        return this.client.query('DELETE FROM `Posts_has_Tags` WHERE ID = ?', tagId);
-    }
-    
-    removeAllTags() {
-        return this.client.query('DELETE FROM `Tags`');
+        return this.client.query('DELETE FROM `Posts_has_Tags` WHERE RelatedTagID = ?', tagId);
     }
 };

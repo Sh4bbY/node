@@ -11,8 +11,9 @@ mongoose.Promise  = Promise;
 
 module.exports = class MongoClient {
     constructor(config) {
-        this.config = config;
-        this.model  = {};
+        this.config        = config;
+        this.connectionUrl = `mongodb://${this.config.host}:${this.config.port}/${this.config.database}`;
+        this.model         = {};
         
         Object.keys(schemata).forEach(key => {
             if (mongoose.models[key]) {
@@ -32,15 +33,35 @@ module.exports = class MongoClient {
             revoked : new Queries(this.model.RevokedToken),
             tweet   : new Queries(this.model.Tweet)
         };
-    
-        mongoose.connection.on('error', err => {
-            logger.error('mongodb connect error:', err);
+        
+        const db = mongoose.connection;
+        
+        db.on('connecting', () => {
+            logger.info('connecting to MongoDB...');
+        });
+        db.on('error', (error) => {
+            logger.error('Error in MongoDb connection: ' + error);
+            logger.error(' trying to reconnect');
+            this.disconnect();
+            this.connect();
+        });
+        db.on('connected', () => {
+            logger.info('MongoDB connected!');
+        });
+        db.once('open', () => {
+            logger.info('MongoDB connection opened!');
+        });
+        db.on('reconnected', () => {
+            logger.info('MongoDB reconnected!');
+        });
+        db.on('disconnected', () => {
+            logger.info('MongoDB disconnected!');
         });
     }
     
     connect() {
         if (!mongoose.connection.readyState) {
-            return mongoose.connect(`mongodb://${this.config.host}:${this.config.port}/${this.config.database}`);
+            return mongoose.connect(this.connectionUrl, {server: {auto_reconnect: true}});
         }
     }
     
